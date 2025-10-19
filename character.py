@@ -31,6 +31,12 @@ class Character:
                 self.pickup()
 
 
-
+        elif event.type==SDL_KEYUP:
+            if event.key==SDLK_a:
+                self.left_down=False
+            elif event.key==SDLK_d:
+                self.right_down=False
+            elif event.key==SDLK_LSHIFT:
+                self.shift_down=False
 
 
