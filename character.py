@@ -56,3 +56,6 @@ class Character:
             self.vy=JUMP_SPEED
             self.on_ground=False
 
+    def start_attack(self):
+
+
