@@ -57,5 +57,7 @@ class Character:
             self.on_ground=False
 
     def start_attack(self):
+        self.attack_time=ATTACK_ACTIVE
+        print("attack!")
 
 
