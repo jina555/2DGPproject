@@ -39,4 +39,7 @@ class Character:
             elif event.key==SDLK_LSHIFT:
                 self.shift_down=False
 
+        elif event.type==SDL_MOUSEBUTTONDOWN and event.button==SDL_BUTTON_LEFT:
+            self.start_attack()
+
 
