@@ -18,4 +18,19 @@ class Character:
         self.face_dir=1 #1:오른쪽, -1:왼쪽
 
     def handle_event(self,event):
+        if event.type==SDL_KEYDOWN:
+            if event.key == SDLK_a:
+                self.left_down=True
+            elif event.key==SDLK_d:
+                self.right_down=True
+            elif event.key == SDLK_LSHIFT:
+                self.shift_down=True
+            elif event.key==SDLK_SPACE:
+                self.jump()
+            elif event.key ==SDLK_f:
+                self.pickup()
+
+
+
+
 
