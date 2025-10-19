@@ -17,5 +17,5 @@ class Character:
         self.on_ground=True
         self.face_dir=1 #1:오른쪽, -1:왼쪽
 
-
+    def handle_event(self,event):
 
