@@ -7,6 +7,12 @@ player= None
 
 
 def reset_world():
+    global world,player
+    world = []
+    game_map = Map()
+    world.append(game_map)
+    player = Character()
+    world.append(player)
     pass
 
 
