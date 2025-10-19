@@ -17,12 +17,20 @@ class Character:
         self.on_ground=True
         self.face_dir=1 #1:오른쪽, -1:왼쪽
 
+        self.a_down=False
+        self.d_down=False
+        self.shift_down=False
+        self.pickup=False
+
+        self.attack_time=0
+        self.attack_box=(0,0,0,0)
+
     def handle_event(self,event):
         if event.type==SDL_KEYDOWN:
             if event.key == SDLK_a:
-                self.left_down=True
+                self.a_down=True
             elif event.key==SDLK_d:
-                self.right_down=True
+                self.d_down=True
             elif event.key == SDLK_LSHIFT:
                 self.shift_down=True
             elif event.key==SDLK_SPACE:
@@ -33,13 +41,15 @@ class Character:
 
         elif event.type==SDL_KEYUP:
             if event.key==SDLK_a:
-                self.left_down=False
+                self.a_down=False
             elif event.key==SDLK_d:
-                self.right_down=False
+                self.d_down=False
             elif event.key==SDLK_LSHIFT:
                 self.shift_down=False
 
         elif event.type==SDL_MOUSEBUTTONDOWN and event.button==SDL_BUTTON_LEFT:
             self.start_attack()
 
+
+    def jump(self):
 
