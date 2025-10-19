@@ -52,4 +52,7 @@ class Character:
 
 
     def jump(self):
+        if self.on_ground:
+            self.vy=JUMP_SPEED
+            self.on_ground=False
 
