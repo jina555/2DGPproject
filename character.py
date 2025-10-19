@@ -9,3 +9,13 @@ ATTACK_W=60 #공격박스 가로
 ATTACK_H=40 #공격박스 세로
 
 class Character:
+    def __init__(self):
+        self.x=400
+        self.y=GROUND_Y+H//2
+        self.vx=0
+        self.vy=0#점프나 낙하시
+        self.on_ground=True
+        self.face_dir=1 #1:오른쪽, -1:왼쪽
+
+
+
