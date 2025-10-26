@@ -56,6 +56,10 @@ class Walk(State):
     pass
 
 
+class Run:
+    pass
+
+
 class Character:
     def __init__(self):
         self.x=400
