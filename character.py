@@ -1,7 +1,9 @@
 from pico2d import *
+from sdl2 import SDL_KEYDOWN,SDL_KEYUP,SDLK_a,SDLK_d,SDLK_LSHIFT,SDLK_SPACE,SDLK_RSHIFT,SDL_BUTTON_RIGHT,SDL_MOUSEBUTTONDOWN
+from state_machine import StateMachine,State
 
-from state_machine import StateMachine
-
+def a_down(e):
+    return e and e[0]=='INPUT' and e[1].type==SDL_KEYDOWN and e[1].key==SDLK_a
 MOVE_SPEED=300
 JUMP_SPEED=900
 W,H=50,70 #캐릭터 크기
@@ -11,7 +13,16 @@ ATTACK_W=60 #공격박스 가로
 ATTACK_H=40 #공격박스 세로
 
 
-class Idle:
+class Idle(State):
+    def __init__(self,p):
+        self.p=p
+    def enter(self,e):
+        self.p.vx=0
+    def do(self):
+        if self.p.a_down and not self.p.d_down:
+            self.p.face_dir=-1
+        elif self.p.d_down and not self.p.a_down:
+            self.p.face_dir=1
     pass
 
 
