@@ -34,6 +34,10 @@ class Idle(State):
     pass
 
 
+class Walk:
+    pass
+
+
 class Character:
     def __init__(self):
         self.x=400
