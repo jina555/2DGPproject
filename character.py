@@ -25,6 +25,12 @@ class Character:
         self.attack_time=0
         self.attack_box=(0,0,0,0)
 
+        self.IDLE=Idle(self)
+        self.WALK=Walk(self)
+        self.RUN=Run(self)
+        self.Jump=Jump(self)
+        self.ATTACK=Attack(self)
+
     def handle_event(self,event):
         if event.type==SDL_KEYDOWN:
             if event.key == SDLK_a:
