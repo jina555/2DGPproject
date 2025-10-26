@@ -1,5 +1,7 @@
 from pico2d import *
 
+from state_machine import StateMachine
+
 MOVE_SPEED=300
 JUMP_SPEED=900
 W,H=50,70 #캐릭터 크기
@@ -7,6 +9,11 @@ GROUND_Y=80
 ATTACK_ACTIVE=0.15 #히트박스 유지 시간
 ATTACK_W=60 #공격박스 가로
 ATTACK_H=40 #공격박스 세로
+
+
+class Idle:
+    pass
+
 
 class Character:
     def __init__(self):
@@ -30,6 +37,21 @@ class Character:
         self.RUN=Run(self)
         self.Jump=Jump(self)
         self.ATTACK=Attack(self)
+        
+        self.state_machine=StateMachine(
+            start_state=self.IDLE,
+            transitions={
+                self.IDLE:{
+                    a_down: self.WALK,
+                    d_down: self.WALK,
+                    shift_down: self.RUN,
+                    space_down: self.Jump,
+                    rmb_down: self.ATTACK,
+
+                }
+            }
+            
+        )
 
     def handle_event(self,event):
         if event.type==SDL_KEYDOWN:
