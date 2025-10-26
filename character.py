@@ -12,7 +12,8 @@ def space_down(e):
     return e and e[0]=='INPUT' and e[1].type==SDL_KEYDOWN and e[1].key==SDLK_SPACE
 def rmb_down(e):
     return e and e[0]=='INPUT' and e[1].type==SDL_MOUSEBUTTONDOWN and e[1].button==SDL_BUTTON_LEFT
-MOVE_SPEED=300
+MOVE_SPEED_RUN=300
+MOVE_SPEED_WALK=150
 JUMP_SPEED=900
 W,H=50,70 #캐릭터 크기
 GROUND_Y=80
@@ -44,9 +45,9 @@ class Walk(State):
             self.p.face_dir=1
     def do(self):
         if self.p.a_down and not self.p.d_down:
-            self.p.vx=-MOVE_SPEED; self.p.face_dir=-1
+            self.p.vx=-MOVE_SPEED_WALK; self.p.face_dir=-1
         elif self.p.d_down and not self.p.a_down:
-            self.p.vx=MOVE_SPEED; self.p.face_dir=1
+            self.p.vx=MOVE_SPEED_WALK; self.p.face_dir=1
         else:
             self.p.vx=0
             self.p.state_machine.set_state(self.p.IDLE,e=None)
@@ -57,6 +58,28 @@ class Walk(State):
 
 
 class Run:
+    def __init__(self,p):
+        self.p=p
+    def enter(self,e):
+        if self.p.a_down and not self.p.d_down:
+            self.p.face_dir=-1
+        elif self.p.d_down and not self.p.a_down:
+            self.p.face_dir=1
+    def do(self):
+        if self.p.shift_down:
+            speed=MOVE_SPEED_RUN
+        else:
+            speed=MOVE_SPEED_WALK
+        if self.p.a_down and not self.p.d_down:
+            self.p.vx=-speed
+            self.p.face_dir=-1
+        elif self.p.d_down and not self.p.a_down:
+            self.p.vx=speed
+            self.p.face_dir=1
+        else:
+            self.p.vx=0
+            self.p.state_machine.set_state(self.p.IDLE,e=None)
+
     pass
 
 
@@ -93,6 +116,11 @@ class Character:
                     space_down: self.Jump,
                     rmb_down: self.ATTACK,
 
+                },
+                self.WALK:{
+                    shift_down: self.RUN,
+                    space_down: self.Jump,
+                    rmb_down: self.ATTACK,
                 }
             }
             
