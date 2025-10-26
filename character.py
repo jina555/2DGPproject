@@ -34,7 +34,25 @@ class Idle(State):
     pass
 
 
-class Walk:
+class Walk(State):
+    def __init__(self,p):
+        self.p=p
+    def enter(self,e):
+        if self.p.a_down and not self.p.d_down:
+            self.p.face_dir=-1
+        elif self.p.d_down and not self.p.a_down:
+            self.p.face_dir=1
+    def do(self):
+        if self.p.a_down and not self.p.d_down:
+            self.p.vx=-MOVE_SPEED; self.p.face_dir=-1
+        elif self.p.d_down and not self.p.a_down:
+            self.p.vx=MOVE_SPEED; self.p.face_dir=1
+        else:
+            self.p.vx=0
+            self.p.state_machine.set_state(self.p.IDLE,e=None)
+            return
+        if self.p.shift_down:
+            self.p.state_machine.set_state(self.p.RUN,e=None)
     pass
 
 
