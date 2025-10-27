@@ -226,6 +226,12 @@ class Character:
         dt=0.01
         self.state_machine.update()
         self.x += self.vx*dt
+        w=get_canvas_width()
+        half=16
+        if self.x<half:
+            self.x=half
+        if self.x>w-half:
+            self.x=w-half
 
     def draw(self):
         self.state_machine.draw()
