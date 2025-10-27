@@ -61,11 +61,21 @@ class Idle(State):
 class Walk(State):
     def __init__(self,p):
         self.p=p
+        self._last=0
+        self._acc=0
+
     def enter(self,e):
         if self.p.a_down and not self.p.d_down:
             self.p.face_dir=-1
         elif self.p.d_down and not self.p.a_down:
             self.p.face_dir=1
+
+        self._last=get_time()
+        self._acc=0
+
+    def exit(self,e):
+        pass
+
     def do(self):
         if self.p.a_down and not self.p.d_down:
             self.p.vx=-MOVE_SPEED_WALK; self.p.face_dir=-1
@@ -77,6 +87,25 @@ class Walk(State):
             return
         if self.p.shift_down:
             self.p.state_machine.set_state(self.p.RUN,e=None)
+            return
+
+        now=get_time()
+        dt=now-self._last
+        self._last=now
+        self._acc+=dt
+        if self._acc>=0.12:
+            self._acc=0
+            self.p.frame=(self.p.frame+1)%4
+
+    def draw(self):
+        scale=3
+        offset_y=64*(scale-1)/2
+        if self.p.face_dir==1:
+            self.p.img_move.clip_draw(self.p.frame*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
+        else:
+            self.p.img_move.clip_composite_draw(self.p.frame*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
+
+
     pass
 
 
@@ -117,6 +146,7 @@ class Character:
         self.last_imput_time=get_time()
 
         self.img_idle=load_image('idle.png')
+        self.img_move=load_image('character_MOVE.png')
 
         self.a_down=False
         self.d_down=False
@@ -180,6 +210,8 @@ class Character:
         if event.type in (SDL_KEYDOWN, SDL_KEYUP,SDL_MOUSEBUTTONDOWN,SDL_MOUSEBUTTONUP):
             self.last_input_time=get_time()
 
+        self.state_machine.handle_state_event(('INPUT',event))
+
 
     def jump(self):
         if self.on_ground:
@@ -191,7 +223,9 @@ class Character:
         print("attack!")
 
     def update(self):
+        dt=0.01
         self.state_machine.update()
+        self.x += self.vx*dt
 
     def draw(self):
         self.state_machine.draw()
