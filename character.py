@@ -49,7 +49,7 @@ class Idle(State):
             self.p.frame=(self.p.frame+1)%4
     def draw(self):
         scale=3
-        offset_y=150*(scale-1)/2
+        offset_y=145*(scale-1)/2
 
         if self.p.face_dir==1:
             self.p.img_idle.clip_draw(self.p.frame*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
@@ -99,7 +99,7 @@ class Walk(State):
 
     def draw(self):
         scale=3
-        offset_y=150*(scale-1)/2
+        offset_y=145*(scale-1)/2
         if self.p.face_dir==1:
             self.p.img_move.clip_draw(self.p.frame*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
