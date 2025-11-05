@@ -156,17 +156,25 @@ class Jump:
         self.p=p
         self._last=0
         self._acc=0
+        self.jump_frames=6
 
         pass
     def enter(self,e):
         if self.p.on_ground:
             self.p.vy=JUMP_SPEED
             self.p.on_ground=False
+
+        self.p.frame=0
         self._last=get_time()
+        self._acc=0
         pass
     def exit(self,e):
         pass
     def do(self):
+        if self.p.on_ground:
+            self.p.state_machine.set_state(self.p.IDLE,e=None)
+            return
+
         if self.p.a_down and not self.p.d_down:
             self.p.vx=-MOVE_SPEED_WALK
             self.p.face_dir=-1
@@ -175,8 +183,6 @@ class Jump:
             self.p.face_dir=1
         else:
             self.p.vx=0
-        if self.p.on_ground:
-            self.p.state_machine.set_state(self.p.IDLE,e=None)
         pass
     def draw(self):
         scale=3
@@ -191,7 +197,7 @@ class Jump:
 
 class Character:
     def __init__(self):
-        self.Jump = 600
+
         self.x=400
         self.y=GROUND_Y+H//2
         self.vx=0
@@ -216,7 +222,7 @@ class Character:
         self.IDLE=Idle(self)
         self.WALK=Walk(self)
         self.RUN=Run(self)
-        self.Jump=Jump(self)
+        self.JUMP=Jump(self)
         # self.ATTACK=Attack(self)
         
         self.state_machine=StateMachine(
@@ -226,15 +232,21 @@ class Character:
                     a_down: self.WALK,
                     d_down: self.WALK,
                     shift_down: self.RUN,
-                    space_down: self.Jump,
+                    space_down: self.JUMP,
+
                     # rmb_down: self.ATTACK,
 
                 },
                 self.WALK:{
                     shift_down: self.RUN,
-                    space_down: self.Jump,
+                    space_down: self.JUMP,
                     # rmb_down: self.ATTACK,
+                },
+                self.RUN:{
+                    space_down: self.JUMP
                 }
+
+
             }
             
         )
@@ -283,13 +295,16 @@ class Character:
         dt=1/60
         self.state_machine.update()
         self.x += self.vx*dt
+
         self.vy-= GRAVITY*dt
         self.y += self.vy*dt
 
-        if self.y<=GROUND_Y +H//2:
+        if self.y <= GROUND_Y + H // 2:
             self.y=GROUND_Y+H//2
             self.vy=0
             self.on_ground=True
+
+
         w=get_canvas_width()
         half=16
         if self.x<half:
