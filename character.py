@@ -20,7 +20,7 @@ GROUND_Y=80
 ATTACK_ACTIVE=0.15 #히트박스 유지 시간
 ATTACK_W=60 #공격박스 가로
 ATTACK_H=40 #공격박스 세로
-
+GRAVITY=2000
 
 class Idle(State):
     def __init__(self,p):
@@ -152,15 +152,39 @@ class Run:
     pass
 
 class Jump:
-    def __init__(self):
+    def __init__(self,p):
+        self.p=p
+        self._last=0
+        self._acc=0
+
         pass
-    def enter(self):
+    def enter(self,e):
+        if self.p.on_ground:
+            self.p.vy=JUMP_SPEED
+            self.p.on_ground=False
+        self._last=get_time()
         pass
-    def exit(self):
+    def exit(self,e):
         pass
     def do(self):
+        if self.p.a_down and not self.p.d_down:
+            self.p.vx=-MOVE_SPEED_WALK
+            self.p.face_dir=-1
+        elif self.p.d_down and not self.p.a_down:
+            self.p.vx=MOVE_SPEED_WALK
+            self.p.face_dir=1
+        else:
+            self.p.vx=0
+        if self.p.on_ground:
+            self.p.state_machine.set_state(self.p.IDLE,e=None)
         pass
     def draw(self):
+        scale=3
+        offset_y=145*(scale-1)/2
+        if self.p.face_dir==1:
+            self.p.img_jump.clip_draw(self.p.frame*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
+        else:
+            self.p.img_jump.clip_composite_draw(self.p.frame*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
         pass
 
 
@@ -179,6 +203,7 @@ class Character:
         self.img_idle=load_image('idle.png')
         self.img_move=load_image('character_MOVE.png')
         self.img_run=load_image('character_MOVE.png')
+        self.img_jump=load_image('character_JUMP.png')
 
         self.a_down=False
         self.d_down=False
@@ -255,9 +280,16 @@ class Character:
         print("attack!")
 
     def update(self):
-        dt=0.01
+        dt=1/60
         self.state_machine.update()
         self.x += self.vx*dt
+        self.vy-= GRAVITY*dt
+        self.y += self.vy*dt
+
+        if self.y<=GROUND_Y +H//2:
+            self.y=GROUND_Y+H//2
+            self.vy=0
+            self.on_ground=True
         w=get_canvas_width()
         half=16
         if self.x<half:
