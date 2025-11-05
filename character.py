@@ -172,7 +172,10 @@ class Jump:
         pass
     def do(self):
         if self.p.on_ground:
-            self.p.state_machine.set_state(self.p.IDLE,e=None)
+            if self.p.a_down != self.p.d_down:
+                self.p.state_machine.set_state(self.p.WALK,e=None)
+            else:
+                self.p.state_machine.set_state(self.p.IDLE,e=None)
             return
 
         if self.p.a_down and not self.p.d_down:
