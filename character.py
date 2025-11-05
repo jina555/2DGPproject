@@ -184,8 +184,7 @@ class Jump:
         elif self.p.d_down and not self.p.a_down:
             self.p.vx=MOVE_SPEED_WALK
             self.p.face_dir=1
-        else:
-            self.p.vx=0
+
         pass
     def draw(self):
         scale=3
