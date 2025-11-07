@@ -196,10 +196,12 @@ class Jump:
         pass
 
 
+class Attack:
+    pass
+
 
 class Character:
     def __init__(self):
-
         self.x=400
         self.y=GROUND_Y+H//2
         self.vx=0
@@ -225,7 +227,7 @@ class Character:
         self.WALK=Walk(self)
         self.RUN=Run(self)
         self.JUMP=Jump(self)
-        # self.ATTACK=Attack(self)
+        self.ATTACK=Attack(self)
         
         self.state_machine=StateMachine(
             start_state=self.IDLE,
@@ -235,17 +237,20 @@ class Character:
                     d_down: self.WALK,
                     shift_down: self.RUN,
                     space_down: self.JUMP,
-
-                    # rmb_down: self.ATTACK,
+                    rmb_down: self.ATTACK,
 
                 },
                 self.WALK:{
                     shift_down: self.RUN,
                     space_down: self.JUMP,
-                    # rmb_down: self.ATTACK,
+                    rmb_down: self.ATTACK,
                 },
                 self.RUN:{
-                    space_down: self.JUMP
+                    space_down: self.JUMP,
+                    rmb_down:self.ATTACK
+                },
+                self.JUMP:{
+                    rmb_down:self.ATTACK
                 }
 
 
