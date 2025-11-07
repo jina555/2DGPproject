@@ -198,15 +198,51 @@ class Jump:
 
 class Attack:
     def __init__(self,p):
+        self.p=p
+        self._last=0
+        self._acc=0
+        self.frame_count=4
+        self.frame_time=0.1
         pass
 
     def enter(self,e):
+        self.p.frame=0
+        self._last=get_time()
+        self._acc=0
+        self.p.attack_time=ATTACK_ACTIVE
+        self.update_attack_box()
+
         pass
     def exit(self,e):
+        self.p.attack_home=(0,0,0,0)
         pass
     def do(self):
+        now=get_time()
+        dt=now-self._last
+        self._last=now
+
+        self._acc += dt
+        if self._acc >= self.frame_time:
+            self._acc=0
+            self.p.frame=(self.p.frame+1)%self.frame_count
+        self.p.attack_time-=dt
+        if self.p.attack_time>0:
+            self.update_attack_box()
+        else:
+            if self.p.a_down != self.p.a_down:
+                self.p.state_machine.set_state(self.p.WALK,e=None)
+            else:
+                self.p.state_machine.set_state(self.p.IDLE,e=None)
+        pass
+    def update_attack_box(self):
         pass
     def draw(self):
+        scale=3
+        offset_y=145*(scale-1)/2
+        if self.p.face_dir==1:
+            self.p.img_attack.clip_draw(self.p.frame*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
+        else:
+            self.p.img_attack.clip_composite_draw(self.p.frame*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
         pass
 
 
@@ -225,6 +261,7 @@ class Character:
         self.img_move=load_image('character_MOVE.png')
         self.img_run=load_image('character_MOVE.png')
         self.img_jump=load_image('character_JUMP.png')
+        self.img_attack=load_image('character_ATTACK.png')
 
         self.a_down=False
         self.d_down=False
