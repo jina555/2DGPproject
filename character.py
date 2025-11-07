@@ -197,7 +197,18 @@ class Jump:
 
 
 class Attack:
-    pass
+    def __init__(self,p):
+        pass
+
+    def enter(self,e):
+        pass
+    def exit(self,e):
+        pass
+    def do(self):
+        pass
+    def draw(self):
+        pass
+
 
 
 class Character:
