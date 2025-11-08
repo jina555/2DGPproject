@@ -203,6 +203,7 @@ class Attack:
         self._acc=0
         self.frame_count=4
         self.frame_time=0.1
+
         pass
 
     def enter(self,e):
@@ -233,6 +234,8 @@ class Attack:
                 self.p.state_machine.set_state(self.p.WALK,e=None)
             else:
                 self.p.state_machine.set_state(self.p.IDLE,e=None)
+            return
+
         pass
     def update_attack_box(self):
         pass

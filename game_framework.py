@@ -1,3 +1,4 @@
+from pico2d import *
 stack=None
 running=True
 
@@ -11,6 +12,7 @@ def run(start_mode):
         stack[-1].handle_events()
         stack[-1].update()
         stack[-1].draw()
+        delay(0.01)
 
     while len(stack)>0:
         stack[-1].finish()
