@@ -1,12 +1,13 @@
 from pico2d import *
 from character import Character
 from map import Map
+import game_framework
 running=True
 world = []
 player= None
 
 
-def reset_world():
+def init():
     global world,player
     world = []
     game_map = Map()
@@ -14,49 +15,43 @@ def reset_world():
     player = Character()
     world.append(player)
     pass
+def finish():
+    global world,player
+    world.clear()
+    player=None
 
 
 def handle_events():
-    global running,player
+    global player
 
     for event in get_events():
         if event.type == SDL_QUIT:
-            running = False
+            game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
-            running = False
+            game_framework.quit()
         else:
             player.handle_event(event)
     pass
 
 
-def update_world():
+def update():
     for o in world:
         o.update()
 
     pass
 
 
-def render_world():
+def draw():
     clear_canvas()
     for o in world:
         o.draw()
     update_canvas()
     pass
 
+def pause():
+    pass
+def resume():
+    pass
 
-def main():
-    global running
-    open_canvas(1280,720)
-    reset_world()
 
-    while running:
-        handle_events()
-        update_world()
-        render_world()
-        delay(0.01)
 
-        
-    close_canvas()
-
-if __name__ == '__main__':
-    main()
