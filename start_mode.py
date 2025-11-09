@@ -10,12 +10,13 @@ CANVAS_HEIGHT=725
 background=None
 start_button=None
 start_button_rect=None
+is_mouse_over_button=False
 
 def init():
     global background,title,start_button,start_button_rect
 
     background=load_image('background.png')
-    title=load_image('타이틀.png')
+    title=load_image('title.png')
     start_button=load_image('타이틀_start.png')
 
     btn_x=CANVAS_WIDTH//2
@@ -68,8 +69,9 @@ def draw():
     clear_canvas()
 
     background.draw(CANVAS_WIDTH//2,CANVAS_HEIGHT//2,CANVAS_WIDTH,CANVAS_HEIGHT)
-    title_scale=3
-    title.draw(CANVAS_WIDTH//2,CANVAS_HEIGHT-200,title.w*title_scale, title.h*title_scale)
+    title.scale=1.8
+
+    title.draw(CANVAS_WIDTH//2,CANVAS_HEIGHT-200,title.w*title.scale, title.h*title.scale)
 
     (left, bottom,right,top) = start_button_rect
     btn_x=(left+right)/2
