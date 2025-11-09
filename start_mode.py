@@ -4,7 +4,7 @@ import play_mode
 import random
 
 CANVAS_WIDTH=1280
-CANVAS_HEIGHT=800
+CANVAS_HEIGHT=725
 
 
 background=None
@@ -51,7 +51,12 @@ def handle_events():
         elif event.type==SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
             mx,my=event.x,CANVAS_HEIGHT-event.y
             left,bottom,right,top=start_button_rect
-            game_framework.change_mode(play_mode)
+
+            if left < mx < right and bottom < my < top:
+
+                game_framework.change_mode(play_mode)
+
+
 
 
 
@@ -70,6 +75,8 @@ def draw():
     btn_x=(left+right)/2
     btn_y=(bottom+top)/2
     start_button.draw(btn_x, btn_y,(right-left),(top-bottom))
+
+
     update_canvas()
     pass
 def pause():
