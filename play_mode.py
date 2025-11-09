@@ -1,24 +1,32 @@
 from pico2d import *
 from character import Character
 from map import Map
+from grass import Grass
 import game_framework
-running=True
-world = []
+import game_world
+
+
 player= None
+grass_map=None
+grass=None
 
 
 def init():
-    global world,player
-    world = []
+    global player, game_map, grass
+
     game_map = Map()
-    world.append(game_map)
     player = Character()
-    world.append(player)
+    grass=Grass()
+    game_world.add_object(game_map,0)
+    game_world.add_object(grass,1)
+    game_world.add_object(player,1)
     pass
 def finish():
-    global world,player
-    world.clear()
+    global player,game_map,grass
+    game_world.clear()
     player=None
+    game_map=None
+    grass=None
 
 
 def handle_events():
@@ -35,16 +43,14 @@ def handle_events():
 
 
 def update():
-    for o in world:
-        o.update()
+    game_world.update()
 
     pass
 
 
 def draw():
     clear_canvas()
-    for o in world:
-        o.draw()
+    game_world.render()
     update_canvas()
     pass
 
