@@ -13,7 +13,7 @@ start_button_rect=None
 is_mouse_over_button=False
 
 def init():
-    global background,title,start_button,start_button_rect
+    global background,title,start_button,start_button_rect,is_mouse_over_button
 
     background=load_image('background.png')
     title=load_image('title.png')
@@ -21,7 +21,7 @@ def init():
 
     btn_x=CANVAS_WIDTH//2
     btn_y=120
-    start_scale=3
+    start_scale=2
     btn_w=start_button.w*start_scale
     btn_h=start_button.h*start_scale
 
@@ -30,6 +30,7 @@ def init():
     right=btn_x+btn_w/2
     top=btn_y+btn_h/2
     start_button_rect=(left,bottom,right,top)
+    is_mouse_over_button=False
     print("start mode initialized")
 
 
@@ -42,21 +43,23 @@ def finish():
     print("start mode finished")
     pass
 def handle_events():
-    global start_button_rect
+    global start_button_rect,is_mouse_over_button
     events=get_events()
     for event in events:
         if event.type==SDL_QUIT:
             game_framework.quit()
         elif event.type==SDL_KEYDOWN and event.key==SDLK_ESCAPE:
             game_framework.quit()
-        elif event.type==SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
+        elif event.type==SDL_MOUSEMOTION:
             mx,my=event.x,CANVAS_HEIGHT-event.y
-            left,bottom,right,top=start_button_rect
-
-            if left < mx < right and bottom < my < top:
-
+            (left, bottom,right,top) = start_button_rect
+            if left < mx<right and bottom < my<top:
+                is_mouse_over_button=True
+            else:
+                is_mouse_over_button=False
+        elif event.type==SDL_MOUSEBUTTONDOWN and event.button==SDL_BUTTON_LEFT:
+            if is_mouse_over_button:
                 game_framework.change_mode(play_mode)
-
 
 
 
@@ -65,7 +68,7 @@ def handle_events():
 def update():
     pass
 def draw():
-    global background, title, start_button, start_button_rect
+    global background, title, start_button, start_button_rect,is_mouse_over_button
     clear_canvas()
 
     background.draw(CANVAS_WIDTH//2,CANVAS_HEIGHT//2,CANVAS_WIDTH,CANVAS_HEIGHT)
@@ -76,7 +79,12 @@ def draw():
     (left, bottom,right,top) = start_button_rect
     btn_x=(left+right)/2
     btn_y=(bottom+top)/2
-    start_button.draw(btn_x, btn_y,(right-left),(top-bottom))
+    btn_w=(right-left)
+    btn_h=(top-bottom)
+    if is_mouse_over_button:
+        start_button.draw(btn_x,btn_y,btn_w*1.1, btn_h*1.1)
+    else:
+        start_button.draw(btn_x,btn_y,btn_w, btn_h)
 
 
     update_canvas()
