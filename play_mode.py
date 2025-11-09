@@ -48,6 +48,8 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
+        if ui_manager.handle_event(event):
+            continue
         else:
             player.handle_event(event)
     pass
