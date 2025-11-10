@@ -35,15 +35,15 @@ JUMP_FRAMES_PER_ACTION=6
 JUMP_TIME_PER_ACTION=0.6
 JUMP_ACTION_PER_TIME=1.0/JUMP_TIME_PER_ACTION
 
-MOVE_SPEED_RUN=80
-MOVE_SPEED_WALK=30
+MOVE_SPEED_RUN=200
+MOVE_SPEED_WALK=100
 JUMP_SPEED=700
 W,H=32,64 #캐릭터 크기
 GROUND_Y=80
 ATTACK_ACTIVE=0.15 #히트박스 유지 시간
 ATTACK_W=60 #공격박스 가로
 ATTACK_H=40 #공격박스 세로
-GRAVITY=1000
+GRAVITY=1800
 
 class Idle(State):
     def __init__(self,p):
@@ -53,7 +53,6 @@ class Idle(State):
         self.p.frame=0
     def exit(self,e):
         pass
-
     def do(self):
         if self.p.a_down and not self.p.d_down:
             self.p.face_dir=-1
@@ -63,8 +62,6 @@ class Idle(State):
     def draw(self):
         scale=3
         offset_y=145*(scale-1)/2
-
-
         if self.p.face_dir==1:
             self.p.img_idle.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
@@ -75,7 +72,6 @@ class Idle(State):
 class Walk(State):
     def __init__(self,p):
         self.p=p
-
     def enter(self,e):
         if self.p.a_down and not self.p.d_down:
             self.p.face_dir=-1
@@ -106,9 +102,7 @@ class Walk(State):
             self.p.img_move.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
             self.p.img_move.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
-
-
-    pass
+        pass
 
 
 class Run:
@@ -121,16 +115,23 @@ class Run:
         pass
     def do(self):
         if not self.p.shift_down:
-            self.p.vx=0
-            self.p.state_machine.set_state(self.p.IDLE,e=None)
+            self.p.vx = 0
+            self.p.state_machine.set_state(self.p.IDLE, e=None)
             return
-        if self.p.a_down and not self.p.d_down:
-            self.p.face_dir=-1
-        elif self.p.d_down and not self.p.a_down:
-            self.p.face_dir=1
 
-        self.p.vx=MOVE_SPEED_RUN * self.p.face_dir
-        self.p.frame=(self.p.frame + RUN_FRAMES_PER_ACTION * WALK_ACTION_PER_TIME * game_framework.frame_time)%RUN_FRAMES_PER_ACTION
+
+        if self.p.a_down and not self.p.d_down:
+            self.p.face_dir = -1
+        elif self.p.d_down and not self.p.a_down:
+            self.p.face_dir = 1
+
+
+        self.p.vx = MOVE_SPEED_RUN * self.p.face_dir
+        self.p.frame = (self.p.frame + RUN_FRAMES_PER_ACTION * RUN_ACTION_PER_TIME * game_framework.frame_time) % RUN_FRAMES_PER_ACTION
+
+        if self.p.space_down:
+            self.p.state_machine.set_state(self.p.JUMP, e=None)
+            return
     def draw(self):
         scale=3
         offset_y=145*(scale-1)/2
@@ -139,17 +140,12 @@ class Run:
             self.p.img_run.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
             self.p.img_run.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
-
-
-
-
-    pass
+        pass
 
 class Jump:
     def __init__(self,p):
         self.p=p
 
-        pass
     def enter(self,e):
         if self.p.on_ground:
             self.p.vy=JUMP_SPEED
@@ -157,22 +153,22 @@ class Jump:
 
         self.p.frame=0
 
-        pass
     def exit(self,e):
         pass
     def do(self):
-        self.p.frame=self.p.frame + JUMP_FRAMES_PER_ACTION * JUMP_ACTION_PER_TIME * game_framework.frame_time
-        if self.p.frame>=JUMP_FRAMES_PER_ACTION:
-            self.p.frame=JUMP_FRAMES_PER_ACTION-1
+        self.p.frame = self.p.frame + JUMP_FRAMES_PER_ACTION * JUMP_ACTION_PER_TIME * game_framework.frame_time
+        if self.p.frame >= JUMP_FRAMES_PER_ACTION:
+            self.p.frame = JUMP_FRAMES_PER_ACTION - 1
+
+
         if self.p.on_ground:
-            if self.p.a_down != self.p.d_down:
-                self.p.state_machine.set_state(self.p.WALK,e=None)
+            if self.p.shift_down:
+                self.p.state_machine.set_state(self.p.RUN, e=None)
+            elif self.p.a_down != self.p.d_down:
+                self.p.state_machine.set_state(self.p.WALK, e=None)
             else:
-                self.p.state_machine.set_state(self.p.IDLE,e=None)
+                self.p.state_machine.set_state(self.p.IDLE, e=None)
             return
-
-
-
         pass
     def draw(self):
         scale=3
@@ -188,17 +184,14 @@ class Jump:
 class Attack:
     def __init__(self,p):
         self.p=p
-        pass
-
     def enter(self,e):
         self.p.frame=0
         self.p.attack_time=ATTACK_ACTIVE
         self.update_attack_box()
 
-        pass
     def exit(self,e):
         self.p.attack_home=(0,0,0,0)
-        pass
+
     def do(self):
         self.p.frame=(self.p.frame + ATTACK_FRAMES_PER_ACTION * ATTACK_ACTION_PER_TIME * game_framework.frame_time)%ATTACK_FRAMES_PER_ACTION
         self.p.attack_time -= game_framework.frame_time
@@ -327,10 +320,9 @@ class Character:
         print("attack!")
 
     def update(self):
-        dt=1/60
-        self.state_machine.update()
-        self.x += self.vx*dt
+        dt= game_framework.frame_time
 
+        self.x += self.vx*dt
         self.vy-= GRAVITY*dt
         self.y += self.vy*dt
 
@@ -338,7 +330,7 @@ class Character:
             self.y=GROUND_Y+H//2
             self.vy=0
             self.on_ground=True
-
+        self.state_machine.update()
 
         w=get_canvas_width()
         half=16
