@@ -251,6 +251,16 @@ class Attack:
         pass
 
 class Die:
+    def __init__(self,p):
+        self.p=p
+    def enter(self,e):
+        pass
+    def exit(self,e):
+        pass
+    def do(self):
+        pass
+    def draw(self):
+        pass
     pass
 
 class Character:
