@@ -23,8 +23,12 @@ WALK_FRAMES_PER_ACTION=4
 WALK_TIME_PER_ACTION = 0.48
 WALK_ACTION_PER_TIME=1.0/WALK_TIME_PER_ACTION
 
-MOVE_SPEED_RUN=300
-MOVE_SPEED_WALK=50
+RUN_FRAMES_PER_ACTION =4
+RUN_TIME_PER_ACTION = 0.4
+RUN_ACTION_PER_TIME=1.0/RUN_TIME_PER_ACTION
+
+MOVE_SPEED_RUN=80
+MOVE_SPEED_WALK=30
 JUMP_SPEED=900
 W,H=32,64 #캐릭터 크기
 GROUND_Y=80
@@ -102,11 +106,8 @@ class Walk(State):
 class Run:
     def __init__(self,p):
         self.p=p
-        self._last=0
-        self._acc=0
     def enter(self,e):
-        self._last=get_time()
-        self._acc=0
+        pass
 
     def exit(self,e):
         pass
@@ -121,21 +122,15 @@ class Run:
             self.p.face_dir=1
 
         self.p.vx=MOVE_SPEED_RUN * self.p.face_dir
-        now=get_time()
-        dt=now-self._last
-        self._last=now
-        self._acc+=dt
-        if self._acc>=0.1:
-            self._acc=0
-            self.p.frame=(self.p.frame+1)%4
+        self.p.frame=(self.p.frame + RUN_FRAMES_PER_ACTION * WALK_ACTION_PER_TIME * game_framework.frame_time)%RUN_FRAMES_PER_ACTION
     def draw(self):
         scale=3
         offset_y=145*(scale-1)/2
 
         if self.p.face_dir==1:
-            self.p.img_run.clip_draw(self.p.frame*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
+            self.p.img_run.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
-            self.p.img_run.clip_composite_draw(self.p.frame*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
+            self.p.img_run.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
 
 
 
