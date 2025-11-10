@@ -250,7 +250,8 @@ class Attack:
             self.p.img_attack.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
         pass
 
-
+class Die:
+    pass
 
 class Character:
     def __init__(self):
@@ -284,6 +285,7 @@ class Character:
         self.RUN=Run(self)
         self.JUMP=Jump(self)
         self.ATTACK=Attack(self)
+        self.DIE=Die(self)
         
         self.state_machine=StateMachine(
             start_state=self.IDLE,
