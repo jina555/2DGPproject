@@ -3,6 +3,7 @@ import game_framework
 import game_world
 from state_machine import StateMachine, State
 import random
+from item import Item
 
 WALK_FRAMES_PER_ACTION=5
 WALK_TIME_PER_ACTION=1.0
@@ -115,7 +116,8 @@ class Die(State):
         pass
     def enter(self,e):
         print('monster:die')
-        # self.p.drop_item()
+        game_world.remove_collision_objects(self.p)
+        self.p.drop_item()
         game_world.remove_object(self.p)
         pass
     def exit(self,e):pass
@@ -200,6 +202,24 @@ class Monster:
             self.state_machine.set_state(self.HURT, e=None)
 
         pass
+    def drop_item(self):
+        roll=random.random()
+        item_to_drop=None
+
+        if roll < 0.10:
+            item_to_drop='WEAPONS'
+        elif roll < 0.60:
+            if random.random() < 0.5:
+                item_to_drop='WEAPON1'
+            else:
+                item_to_drop='WEAPON2'
+
+
+            print(f"Dropping {item_to_drop}")
+            new_item = Item(self.x, self.y, item_to_drop)
+            game_world.add_object(new_item, 1)
+            game_world.add_collision_pair('player:item', None, new_item)
+
 
 
 
