@@ -27,15 +27,23 @@ RUN_FRAMES_PER_ACTION =4
 RUN_TIME_PER_ACTION = 0.4
 RUN_ACTION_PER_TIME=1.0/RUN_TIME_PER_ACTION
 
+ATTACK_FRAMES_PER_ACTION=4
+ATTACK_TIME_PER_ACTION=0.4
+ATTACK_ACTION_PER_TIME=1.0/ATTACK_TIME_PER_ACTION
+
+JUMP_FRAMES_PER_ACTION=6
+JUMP_TIME_PER_ACTION=0.6
+JUMP_ACTION_PER_TIME=1.0/JUMP_TIME_PER_ACTION
+
 MOVE_SPEED_RUN=80
 MOVE_SPEED_WALK=30
-JUMP_SPEED=900
+JUMP_SPEED=700
 W,H=32,64 #캐릭터 크기
 GROUND_Y=80
 ATTACK_ACTIVE=0.15 #히트박스 유지 시간
 ATTACK_W=60 #공격박스 가로
 ATTACK_H=40 #공격박스 세로
-GRAVITY=2000
+GRAVITY=1000
 
 class Idle(State):
     def __init__(self,p):
@@ -140,9 +148,6 @@ class Run:
 class Jump:
     def __init__(self,p):
         self.p=p
-        self._last=0
-        self._acc=0
-        self.jump_frames=6
 
         pass
     def enter(self,e):
@@ -151,12 +156,14 @@ class Jump:
             self.p.on_ground=False
 
         self.p.frame=0
-        self._last=get_time()
-        self._acc=0
+
         pass
     def exit(self,e):
         pass
     def do(self):
+        self.p.frame=self.p.frame + JUMP_FRAMES_PER_ACTION * JUMP_ACTION_PER_TIME * game_framework.frame_time
+        if self.p.frame>=JUMP_FRAMES_PER_ACTION:
+            self.p.frame=JUMP_FRAMES_PER_ACTION-1
         if self.p.on_ground:
             if self.p.a_down != self.p.d_down:
                 self.p.state_machine.set_state(self.p.WALK,e=None)
@@ -164,12 +171,7 @@ class Jump:
                 self.p.state_machine.set_state(self.p.IDLE,e=None)
             return
 
-        if self.p.a_down and not self.p.d_down:
-            self.p.vx=-MOVE_SPEED_WALK
-            self.p.face_dir=-1
-        elif self.p.d_down and not self.p.a_down:
-            self.p.vx=MOVE_SPEED_WALK
-            self.p.face_dir=1
+
 
         pass
     def draw(self):
@@ -177,26 +179,19 @@ class Jump:
         offset_y=145*(scale-1)/2
 
         if self.p.face_dir==1:
-            self.p.img_jump.clip_draw(self.p.frame*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
+            self.p.img_jump.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
-            self.p.img_jump.clip_composite_draw(self.p.frame*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
+            self.p.img_jump.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
         pass
 
 
 class Attack:
     def __init__(self,p):
         self.p=p
-        self._last=0
-        self._acc=0
-        self.frame_count=4
-        self.frame_time=0.1
-
         pass
 
     def enter(self,e):
         self.p.frame=0
-        self._last=get_time()
-        self._acc=0
         self.p.attack_time=ATTACK_ACTIVE
         self.update_attack_box()
 
@@ -205,15 +200,8 @@ class Attack:
         self.p.attack_home=(0,0,0,0)
         pass
     def do(self):
-        now=get_time()
-        dt=now-self._last
-        self._last=now
-
-        self._acc += dt
-        if self._acc >= self.frame_time:
-            self._acc=0
-            self.p.frame=(self.p.frame+1)%self.frame_count
-        self.p.attack_time-=dt
+        self.p.frame=(self.p.frame + ATTACK_FRAMES_PER_ACTION * ATTACK_ACTION_PER_TIME * game_framework.frame_time)%ATTACK_FRAMES_PER_ACTION
+        self.p.attack_time -= game_framework.frame_time
         if self.p.attack_time>0:
             self.update_attack_box()
         else:
@@ -231,9 +219,9 @@ class Attack:
         offset_y=145*(scale-1)/2
 
         if self.p.face_dir==1:
-            self.p.img_attack.clip_draw(self.p.frame*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
+            self.p.img_attack.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
-            self.p.img_attack.clip_composite_draw(self.p.frame*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
+            self.p.img_attack.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
         pass
 
 
@@ -247,6 +235,7 @@ class Character:
         self.on_ground=True
         self.face_dir=1 #1:오른쪽, -1:왼쪽
         self.last_imput_time=get_time()
+        self.frame=0.0
 
         self.img_idle=load_image('res/idle.png')
         self.img_move=load_image('res/character_MOVE.png')
