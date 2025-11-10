@@ -2,6 +2,7 @@ from pico2d import *
 from sdl2 import SDL_KEYDOWN,SDL_KEYUP,SDLK_a,SDLK_d,SDLK_LSHIFT,SDLK_SPACE,SDLK_RSHIFT,SDL_BUTTON_LEFT,SDL_MOUSEBUTTONDOWN
 from state_machine import StateMachine,State
 import game_framework
+import game_world
 
 
 def a_down(e):
@@ -44,6 +45,32 @@ ATTACK_ACTIVE=0.15 #히트박스 유지 시간
 ATTACK_W=60 #공격박스 가로
 ATTACK_H=40 #공격박스 세로
 GRAVITY=1800
+class PlayerAttackBox:
+    def __init__(self, char_x, char_y, face_dir):
+        self.life_time = ATTACK_ACTIVE
+        self.face_dir = face_dir
+        scale = 3
+        char_half_w = (W * scale) // 2
+        if self.face_dir == 1:
+            self.left = char_x + char_half_w
+            self.right = self.left + ATTACK_W
+        else:
+            self.right = char_x - char_half_w
+            self.left = self.right - ATTACK_W
+        monster_center_y = 191
+        self.bottom = monster_center_y - (ATTACK_H // 2)
+        self.top = monster_center_y + (ATTACK_H // 2)
+    def update(self):
+        self.life_time -= game_framework.frame_time
+        if self.life_time < 0:
+            game_world.remove_object(self)
+    def get_bb(self):
+        return self.left, self.bottom, self.right, self.top
+    def handle_collision(self, group, other):
+        if group == 'player_attack:monster':
+            pass
+    def draw(self):
+        pass
 
 class Idle(State):
     def __init__(self,p):
@@ -195,15 +222,14 @@ class Attack:
     def do(self):
         self.p.frame=(self.p.frame + ATTACK_FRAMES_PER_ACTION * ATTACK_ACTION_PER_TIME * game_framework.frame_time)%ATTACK_FRAMES_PER_ACTION
         self.p.attack_time -= game_framework.frame_time
-        if self.p.attack_time>0:
-            self.update_attack_box()
-        else:
-            if self.p.a_down != self.p.a_down:
+        if self.p.attack_time<0:
+            if self.p.a_down != self.p.d_down:
                 self.p.state_machine.set_state(self.p.WALK,e=None)
             else:
                 self.p.state_machine.set_state(self.p.IDLE,e=None)
             return
-
+        else:
+            self.update_attack_box()
         pass
     def update_attack_box(self):
         pass
@@ -229,6 +255,8 @@ class Character:
         self.face_dir=1 #1:오른쪽, -1:왼쪽
         self.last_imput_time=get_time()
         self.frame=0.0
+
+        self.invincible_timer=0.0
 
         self.img_idle=load_image('res/idle.png')
         self.img_move=load_image('res/character_MOVE.png')
@@ -318,9 +346,41 @@ class Character:
     def start_attack(self):
         self.attack_time=ATTACK_ACTIVE
         print("attack!")
+        attack_box = PlayerAttackBox(self.x, self.y, self.face_dir)
+        game_world.add_object(attack_box, 1)
+        game_world.add_collision_pair('player_attack:monster', attack_box, None)
+
+    def get_bb(self):
+        scale = 3
+        draw_y = self.y + 145
+        half_w = 32
+        half_h = 64
+        return self.x - half_w, draw_y - half_h, self.x + half_w, draw_y + half_h
+
+    # ---
+
+    # (신규) handle_collision() 메서드
+    def handle_collision(self, group, other):
+        if self.invincible_timer>0:
+            return
+        if group == 'player:monster':
+            print("PLAYER collided with MONSTER")
+            self.invincible_timer=0.5
+            if self.face_dir==1:
+                self.x-=10
+            else:
+                self.x +=10
+            pass
+        elif group == 'player:item':
+            pass
 
     def update(self):
         dt= game_framework.frame_time
+        if self.invincible_timer > 0:
+            self.invincible_timer -= dt
+            if self.invincible_timer < 0:
+                self.invincible_timer = 0
+                print("Invincibility finished.")
 
         self.x += self.vx*dt
         self.vy-= GRAVITY*dt

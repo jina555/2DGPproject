@@ -2,6 +2,7 @@ from pico2d import *
 from character import Character
 from map import Map
 from grass import Grass
+from monster import Monster
 import game_framework
 import game_world
 from ui_manager import UIManager
@@ -15,29 +16,43 @@ player= None
 grass_map=None
 grass=None
 ui_manager=None
+monsters=[]
 
 
 def init():
-    global player, game_map, grass,ui_manager
+    global player, game_map, grass,ui_manager,monsters
 
     game_map = Map()
     player = Character()
     grass=Grass()
     ui_manager=UIManager()
+    monsters=[Monster() for _ in range(5)]
 
     game_world.add_object(game_map,0)
     game_world.add_object(grass,1)
     game_world.add_object(player,1)
+    game_world.add_objects(monsters,1)
     game_world.add_object(ui_manager,2)
+
+    game_world.add_collision_pair('player:monster',player,None)
+    game_world.add_collision_pair('player_attack:monster',None,None)
+
+
+
+    for m in monsters:
+        game_world.add_collision_pair('player:monster',None,m)
+        game_world.add_collision_pair('player_attack:monster',None,m)
+
 
     pass
 def finish():
-    global player,game_map,grass,ui_manager
+    global player,game_map,grass,ui_manager,monsters
     game_world.clear()
     player=None
     game_map=None
     grass=None
     ui_manager=None
+    monsters=[]
 
 
 def handle_events():
@@ -57,6 +72,7 @@ def handle_events():
 
 def update():
     game_world.update()
+    game_world.handle_collisions()
 
     pass
 
