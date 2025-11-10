@@ -45,10 +45,14 @@ ATTACK_ACTIVE=0.15 #히트박스 유지 시간
 ATTACK_W=60 #공격박스 가로
 ATTACK_H=40 #공격박스 세로
 GRAVITY=1800
+
+DAMAGE_BARE_HANDS=20
 class PlayerAttackBox:
-    def __init__(self, char_x, char_y, face_dir):
+    def __init__(self, char_x, char_y, face_dir,damage):
         self.life_time = ATTACK_ACTIVE
         self.face_dir = face_dir
+        self.damage = damage
+
         scale = 3
         char_half_w = (W * scale) // 2
         if self.face_dir == 1:
@@ -116,6 +120,9 @@ class Walk(State):
         else:
             self.p.vx=0
             self.p.state_machine.set_state(self.p.IDLE,e=None)
+            return
+        if self.p.shift_down:
+            self.p.state_machine.set_state(self.p.RUN, e=None)
             return
         self.p.frame=(self.p.frame + WALK_FRAMES_PER_ACTION * WALK_ACTION_PER_TIME * game_framework.frame_time)%WALK_FRAMES_PER_ACTION
 
@@ -346,7 +353,7 @@ class Character:
     def start_attack(self):
         self.attack_time=ATTACK_ACTIVE
         print("attack!")
-        attack_box = PlayerAttackBox(self.x, self.y, self.face_dir)
+        attack_box = PlayerAttackBox(self.x, self.y, self.face_dir,DAMAGE_BARE_HANDS)
         game_world.add_object(attack_box, 1)
         game_world.add_collision_pair('player_attack:monster', attack_box, None)
 
@@ -400,6 +407,11 @@ class Character:
             self.x=w-half
 
     def draw(self):
+        if self.invincible_timer>0:
+            if int(get_time()*10)%2==0:
+                pass
+            else:
+                return
         self.state_machine.draw()
 
 
