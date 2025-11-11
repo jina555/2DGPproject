@@ -1,8 +1,10 @@
 from pico2d import *
 from sdl2 import SDL_KEYDOWN,SDL_KEYUP,SDLK_a,SDLK_d,SDLK_LSHIFT,SDLK_SPACE,SDLK_RSHIFT,SDL_BUTTON_LEFT,SDL_MOUSEBUTTONDOWN
 from state_machine import StateMachine,State
+from item import Item
 import game_framework
 import game_world
+import math
 
 
 def a_down(e):
@@ -42,9 +44,16 @@ JUMP_SPEED=700
 W,H=32,64 #캐릭터 크기
 GROUND_Y=80
 ATTACK_ACTIVE=0.15 #히트박스 유지 시간
-ATTACK_W=60 #공격박스 가로
-ATTACK_H=40 #공격박스 세로
+ATTACK_W=20 #공격박스 가로
+ATTACK_H=30 #공격박스 세로
 GRAVITY=1800
+
+WEAPON_DAMAGE = {
+    'WEAPON1': 40,
+    'WEAPON2': 60,
+    'WEAPON_S': 100,
+}
+ITEM_DRAW_W, ITEM_DRAW_H = 53, 53
 
 DAMAGE_BARE_HANDS=20
 class PlayerAttackBox:
@@ -74,7 +83,33 @@ class PlayerAttackBox:
         if group == 'player_attack:monster':
             pass
     def draw(self):
+        draw_rectangle(*self.get_bb(),255,0,0)
         pass
+
+
+def _draw_weapon(p, state_name):
+    if not p.equipped_weapon:
+        return
+
+    weapon_image = p.item_images.get(p.equipped_weapon)
+    if not weapon_image:
+        return
+
+
+    offset_list = p.weapon_offset.get(state_name, p.weapon_offset['idle'])
+
+    frame_index = clamp(0, int(p.frame), len(offset_list) - 1)
+    base_offset_x, offset_y = offset_list[frame_index]
+
+    offset_x = base_offset_x * p.face_dir
+
+    draw_x = p.x + offset_x
+    draw_y = p.y + offset_y
+
+    if p.face_dir == 1:
+        weapon_image.draw(draw_x, draw_y, ITEM_DRAW_W, ITEM_DRAW_H)
+    else:
+        weapon_image.composite_draw(0, 'h', draw_x, draw_y, ITEM_DRAW_W, ITEM_DRAW_H)
 
 class Idle(State):
     def __init__(self,p):
@@ -92,11 +127,13 @@ class Idle(State):
         self.p.frame=(self.p.frame + IDLE_FRAMES_PER_ACTION * IDLE_ACTION_PER_TIME * game_framework.frame_time)%IDLE_FRAMES_PER_ACTION
     def draw(self):
         scale=3
-        offset_y=145*(scale-1)/2
+        offset_y=145*(scale-1)//2
         if self.p.face_dir==1:
             self.p.img_idle.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
             self.p.img_idle.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
+
+        _draw_weapon(self.p,'idle')
     pass
 
 
@@ -130,12 +167,14 @@ class Walk(State):
 
     def draw(self):
         scale=3
-        offset_y=145*(scale-1)/2
+        offset_y=145*(scale-1)//2
 
         if self.p.face_dir==1:
             self.p.img_move.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
             self.p.img_move.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
+
+        _draw_weapon(self.p,'walk')
         pass
 
 
@@ -168,12 +207,14 @@ class Run:
             return
     def draw(self):
         scale=3
-        offset_y=145*(scale-1)/2
+        offset_y=145*(scale-1)//2
 
         if self.p.face_dir==1:
             self.p.img_run.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
             self.p.img_run.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
+
+        _draw_weapon(self.p,'run')
         pass
 
 class Jump:
@@ -206,12 +247,14 @@ class Jump:
         pass
     def draw(self):
         scale=3
-        offset_y=145*(scale-1)/2
+        offset_y=145*(scale-1)//2
 
         if self.p.face_dir==1:
             self.p.img_jump.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
             self.p.img_jump.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
+
+        _draw_weapon(self.p,'jump')
         pass
 
 
@@ -220,7 +263,7 @@ class Attack:
         self.p=p
     def enter(self,e):
         self.p.frame=0
-        self.p.attack_time=ATTACK_ACTIVE
+        self.p.attack_time=ATTACK_TIME_PER_ACTION
         self.update_attack_box()
 
     def exit(self,e):
@@ -242,12 +285,14 @@ class Attack:
         pass
     def draw(self):
         scale=3
-        offset_y=145*(scale-1)/2
+        offset_y=145*(scale-1)//2
 
         if self.p.face_dir==1:
             self.p.img_attack.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
             self.p.img_attack.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
+
+        _draw_weapon(self.p,'attack')
         pass
 
 # class Die:
@@ -283,6 +328,20 @@ class Character:
         self.img_jump=load_image('res/character_JUMP.png')
         self.img_attack=load_image('res/character_ATTACK.png')
 
+        self.item_images = {
+            'WEAPON1': load_image('item/무기1.png'),
+            'WEAPON2': load_image('item/무기2.png'),
+            'WEAPON_S': load_image('item/무기s.png')
+        }
+
+        self.weapon_offset = {
+            'idle': [(5, 88),(5,85),(5,88),(5,85)],
+            'walk': [(5, 85),(-10,80),(5,85),(5,85)],
+            'run': [(5,85),(-10,80),(5,85),(5,85)],
+            'jump': [(5,80),(0,90),(-4,110),(-3,100),(2,90),(5,80)],
+            'attack': [(5,85), (-20, 120), (45,90), (25,85)]
+        }
+
         self.a_down=False
         self.d_down=False
         self.shift_down=False
@@ -293,7 +352,7 @@ class Character:
         self.colliding_item_list=[]
         self.inventory=[]
         self.max_inventory_slots=24
-        # self.equipped_weapon=None
+        self.equipped_weapon=None
 
         self.IDLE=Idle(self)
         self.WALK=Walk(self)
@@ -370,20 +429,16 @@ class Character:
     def start_attack(self):
         self.attack_time=ATTACK_ACTIVE
         print("attack!")
-        attack_box = PlayerAttackBox(self.x, self.y, self.face_dir,DAMAGE_BARE_HANDS)
+        current_damage = WEAPON_DAMAGE.get(self.equipped_weapon, DAMAGE_BARE_HANDS)
+        print(f"Attack damage: {current_damage} ({self.equipped_weapon})")
+        attack_box = PlayerAttackBox(self.x, self.y, self.face_dir,current_damage)
         game_world.add_object(attack_box, 1)
         game_world.add_collision_pair('player_attack:monster', attack_box, None)
 
     def get_bb(self):
-        scale = 3
-        draw_y = self.y + 145
-        half_w = 32
-        half_h = 64
-        return self.x - half_w, draw_y - half_h, self.x + half_w, draw_y + half_h
 
-    # ---
+        return self.x -32,self.y+50,self.x+32,self.y+164
 
-    # (신규) handle_collision() 메서드
     def handle_collision(self, group, other):
         if self.invincible_timer>0:
             return
@@ -399,6 +454,7 @@ class Character:
             if other not in self.colliding_item_list:
                 self.colliding_item_list.append(other)
             pass
+
     def try_pickup(self):
         if self.colliding_item_list:
             item_to_pick = self.colliding_item_list[0]
@@ -410,11 +466,29 @@ class Character:
 
     def add_to_inventory(self, item):
         if len(self.inventory) < self.max_inventory_slots:
-            # 아이템 객체 통째로가 아닌, '타입(문자열)'을 저장합니다.
+
             self.inventory.append(item.item_type)
             print(f"Inventory: {self.inventory}")  # 콘솔에서 확인용
             return True  # 추가 성공
         return False
+
+    def equip_item(self, inventory_index):
+
+        if not (0 <= inventory_index < len(self.inventory)):
+            print("Invalid inventory index")
+            return
+
+
+        item_to_equip = self.inventory[inventory_index]
+        old_equipped_weapon=self.equipped_weapon
+        self.equipped_weapon=item_to_equip
+
+
+        if old_equipped_weapon :
+            self.inventory[inventory_index]=old_equipped_weapon
+        else:
+            self.inventory.pop(inventory_index)
+
 
 
     def update(self):
@@ -451,5 +525,7 @@ class Character:
             else:
                 return
         self.state_machine.draw()
+
+        draw_rectangle(*self.get_bb(), 255, 0, 0)
 
 

@@ -28,7 +28,6 @@ class Item:
         image.draw(self.x,self.y,ITEM_W,ITEM_H)
     def handle_collision(self,group,other):
         if group =='player:item':
-            print(f"Player picked up item of type {self.item_type}")
             pass
 
 
