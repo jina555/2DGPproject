@@ -37,6 +37,8 @@ def init():
     game_world.add_collision_pair('player:monster',player,None)
     game_world.add_collision_pair('player_attack:monster',None,None)
 
+    game_world.add_collision_pair('player:item',player,None)
+
 
 
     for m in monsters:
