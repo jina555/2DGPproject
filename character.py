@@ -291,8 +291,8 @@ class Character:
         self.attack_box=(0,0,0,0)
 
         self.colliding_item_list=[]
-        # self.inventory=[]
-        # self.max_inventory_slots=24
+        self.inventory=[]
+        self.max_inventory_slots=24
         # self.equipped_weapon=None
 
         self.IDLE=Idle(self)
@@ -402,8 +402,19 @@ class Character:
     def try_pickup(self):
         if self.colliding_item_list:
             item_to_pick = self.colliding_item_list[0]
-            print(f"Picking up item: {item_to_pick.item_type}")
-            game_world.remove_object(item_to_pick)
+            if self.add_to_inventory(item_to_pick):
+                print(f"Picking up item: {item_to_pick.item_type}")
+                game_world.remove_object(item_to_pick)
+            else:
+                print('inventory full! cannot pick up item.')
+
+    def add_to_inventory(self, item):
+        if len(self.inventory) < self.max_inventory_slots:
+            # 아이템 객체 통째로가 아닌, '타입(문자열)'을 저장합니다.
+            self.inventory.append(item.item_type)
+            print(f"Inventory: {self.inventory}")  # 콘솔에서 확인용
+            return True  # 추가 성공
+        return False
 
 
     def update(self):
