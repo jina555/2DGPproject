@@ -250,18 +250,19 @@ class Attack:
             self.p.img_attack.clip_composite_draw(int(self.p.frame)*32,0,32,64,0,'h',self.p.x,self.p.y+offset_y,32*scale,64*scale)
         pass
 
-class Die:
-    def __init__(self,p):
-        self.p=p
-    def enter(self,e):
-        pass
-    def exit(self,e):
-        pass
-    def do(self):
-        pass
-    def draw(self):
-        pass
-    pass
+# class Die:
+#     def __init__(self,p):
+#         self.p=p
+#     def enter(self,e):
+#
+#         pass
+#     def exit(self,e):
+#         pass
+#     def do(self):
+#         pass
+#     def draw(self):
+#         pass
+#     pass
 
 class Character:
     def __init__(self):
@@ -285,17 +286,21 @@ class Character:
         self.a_down=False
         self.d_down=False
         self.shift_down=False
-        self.pickup=False
 
         self.attack_time=0
         self.attack_box=(0,0,0,0)
+
+        self.colliding_item_list=[]
+        # self.inventory=[]
+        # self.max_inventory_slots=24
+        # self.equipped_weapon=None
 
         self.IDLE=Idle(self)
         self.WALK=Walk(self)
         self.RUN=Run(self)
         self.JUMP=Jump(self)
         self.ATTACK=Attack(self)
-        self.DIE=Die(self)
+        # self.DIE=Die(self)
         
         self.state_machine=StateMachine(
             start_state=self.IDLE,
@@ -337,7 +342,7 @@ class Character:
             elif event.key==SDLK_SPACE:
                 self.jump()
             elif event.key ==SDLK_f:
-                self.pickup=True
+                self.try_pickup()
 
 
         elif event.type==SDL_KEYUP:
@@ -391,9 +396,19 @@ class Character:
                 self.x +=10
             pass
         elif group == 'player:item':
+            if other not in self.colliding_item_list:
+                self.colliding_item_list.append(other)
             pass
+    def try_pickup(self):
+        if self.colliding_item_list:
+            item_to_pick = self.colliding_item_list[0]
+            print(f"Picking up item: {item_to_pick.item_type}")
+            game_world.remove_object(item_to_pick)
+
 
     def update(self):
+        self.colliding_item_list=[]
+
         dt= game_framework.frame_time
         if self.invincible_timer > 0:
             self.invincible_timer -= dt

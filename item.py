@@ -3,7 +3,7 @@ import game_world
 import game_framework
 
 item_images=None
-ITEM_W,ITEM_H=32,32
+ITEM_W,ITEM_H=35,35
 
 class Item:
     def __init__(self,x,y,item_type):
@@ -17,7 +17,7 @@ class Item:
             item_images={
                 'WEAPON1': load_image('item/무기1.png'),
                 'WEAPON2': load_image('item/무기2.png'),
-                'WEAPON3': load_image('item/무기s.png')
+                'WEAPON_S': load_image('item/무기s.png')
             }
     def update(self):
         pass
@@ -29,6 +29,6 @@ class Item:
     def handle_collision(self,group,other):
         if group =='player:item':
             print(f"Player picked up item of type {self.item_type}")
-            game_world.remove_object(self)
+            pass
 
 

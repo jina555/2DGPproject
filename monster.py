@@ -207,18 +207,25 @@ class Monster:
         item_to_drop=None
 
         if roll < 0.10:
-            item_to_drop='WEAPONS'
+            item_to_drop='WEAPON_S'
         elif roll < 0.60:
             if random.random() < 0.5:
                 item_to_drop='WEAPON1'
             else:
                 item_to_drop='WEAPON2'
 
-
+        if item_to_drop:  # 아이템을 드랍하기로 결정됐다면
             print(f"Dropping {item_to_drop}")
             new_item = Item(self.x, self.y, item_to_drop)
             game_world.add_object(new_item, 1)
-            game_world.add_collision_pair('player:item', None, new_item)
+
+            # (수정) game_world에서 player 객체를 가져와서 충돌 페어에 등록
+            player = game_world.get_player()
+            if player:
+                game_world.add_collision_pair('player:item', player, new_item)
+            else:
+                # 혹시 모르니 player가 없을 경우의 처리
+                game_world.add_collision_pair('player:item', None, new_item)
 
 
 
