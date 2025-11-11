@@ -25,7 +25,7 @@ def init():
     game_map = Map()
     player = Character()
     grass=Grass()
-    ui_manager=UIManager()
+    ui_manager=UIManager(player)
     monsters=[Monster() for _ in range(5)]
 
     game_world.add_object(game_map,0)
