@@ -1,12 +1,17 @@
 from pico2d import *
+from character import GROUND_Y
+import play_mode
 
 class Grass:
     def __init__(self):
-        self.image = load_image('grass1.png')
-        self.y=120
-        self.h=80
+        self.image = load_image('res/grass.png')
+        self.h=self.image.h
+        self.y=GROUND_Y
+        self.w=self.image.w
 
     def draw(self):
-        self.image.draw(get_canvas_width()//2,self.y,get_canvas_width(),self.h)
+        canvas_width=get_canvas_width()
+
+        self.image.draw(canvas_width//2,self.y,canvas_width,self.h)
     def update(self):
         pass
