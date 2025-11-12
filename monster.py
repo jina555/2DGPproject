@@ -4,6 +4,7 @@ import game_world
 from state_machine import StateMachine, State
 import random
 from item import Item
+import math
 
 WALK_FRAMES_PER_ACTION=5
 WALK_TIME_PER_ACTION=1.0
@@ -39,7 +40,7 @@ class Walk(State):
         if self.p.x < 50:
             self.p.vx=MOVE_SPEED
             self.p.face_dir=1
-        elif self.p.x > 1280-50:
+        elif self.p.x > 1000-50:
             self.p.vx=-MOVE_SPEED
             self.p.face_dir=-1
         pass
@@ -167,26 +168,29 @@ class Monster:
             current_hp_width = int((self.hp / self.max_hp) * HP_BAR_MAX_WIDTH)
             if current_hp_width < 0:
                 current_hp_width = 0
-            Monster.hp_bar_image.draw(self.x, bar_y, current_hp_width, HP_BAR_HEIGHT)
+            bar_left_edge = self.x - (HP_BAR_MAX_WIDTH // 2)
+
+            current_bar_center_x = bar_left_edge + (current_hp_width // 2)
+
+            Monster.hp_bar_image.draw(current_bar_center_x, bar_y, current_hp_width, HP_BAR_HEIGHT)
+
+        # draw_rectangle(*self.get_bb(),255,0,0)
 
 
 
         pass
     def get_bb(self):
-        half_w=30
-        half_h=30
-        return self.x-half_w,self.y-half_h,self.x+half_w,self.y+half_h
+
+        return self.x-30,self.y-40,self.x+30,self.y-5
         pass
     def handle_collision(self,group,other):
         if self.state_machine.current in (self.HURT, self.ATTACK, self.DIE):
             return
 
-            # 2. (수정) 우선순위 1: 'player:monster' (몸통) 먼저 검사
         if group == 'player:monster':
             print("MONSTER: Collided with PLAYER, changing to ATTACK")
             self.state_machine.set_state(self.ATTACK, e=None)
 
-            # 3. (수정) 우선순위 2: 'player_attack' (맞았을 때) 나중에 검사
         elif group == 'player_attack:monster':
             print("MONSTER: Collided with PLAYER_ATTACK, changing to HURT")
             damage = 0
@@ -206,20 +210,19 @@ class Monster:
         roll=random.random()
         item_to_drop=None
 
-        if roll < 0.10:
+        if roll < 0.05:
             item_to_drop='WEAPON_S'
-        elif roll < 0.60:
-            if random.random() < 0.5:
+        elif roll < 0.5:
+            if random.random() < 0.25:
                 item_to_drop='WEAPON1'
             else:
                 item_to_drop='WEAPON2'
 
         if item_to_drop:  # 아이템을 드랍하기로 결정됐다면
             print(f"Dropping {item_to_drop}")
-            new_item = Item(self.x, self.y, item_to_drop)
+            new_item = Item(self.x, 190, item_to_drop)
             game_world.add_object(new_item, 1)
 
-            # (수정) game_world에서 player 객체를 가져와서 충돌 페어에 등록
             player = game_world.get_player()
             if player:
                 game_world.add_collision_pair('player:item', player, new_item)
