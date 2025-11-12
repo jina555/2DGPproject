@@ -11,7 +11,6 @@ class Item:
 
         self.x,self.y=x,y
         self.item_type=item_type
-        print(f"Item created at ({self.x}, {self.y}) of type {self.item_type}")
 
         if item_images is None:
             item_images={
@@ -23,9 +22,11 @@ class Item:
         pass
     def get_bb(self):
         return self.x-ITEM_W//2, self.y-ITEM_H//2, self.x+ITEM_W//2, self.y+ITEM_H//2
+
     def draw(self):
         image=item_images[self.item_type]
         image.draw(self.x,self.y,ITEM_W,ITEM_H)
+
     def handle_collision(self,group,other):
         if group =='player:item':
             pass
