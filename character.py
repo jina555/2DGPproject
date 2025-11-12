@@ -54,7 +54,7 @@ WEAPON_DAMAGE = {
     'WEAPON2': 60,
     'WEAPON_S': 100,
 }
-ITEM_DRAW_W, ITEM_DRAW_H = 40, 40
+ITEM_DRAW_W, ITEM_DRAW_H = 53, 53
 
 DAMAGE_BARE_HANDS=20
 class PlayerAttackBox:
@@ -101,16 +101,14 @@ def _draw_weapon(p, state_name):
 
     frame_index = clamp(0, int(p.frame), len(offset_list) - 1)
     base_offset_x, offset_y = offset_list[frame_index]
-
     offset_x = base_offset_x * p.face_dir
-
     draw_x = p.x + offset_x
     draw_y = p.y + offset_y
-
+    weapon_degree=-170 * p.face_dir
     if p.face_dir == 1:
-        weapon_image.draw(draw_x, draw_y, ITEM_DRAW_W, ITEM_DRAW_H)
+        weapon_image.composite_draw(weapon_degree,'',draw_x, draw_y ,ITEM_DRAW_W, ITEM_DRAW_H)
     else:
-        weapon_image.composite_draw(0, 'h', draw_x, draw_y, ITEM_DRAW_W, ITEM_DRAW_H)
+        weapon_image.composite_draw(weapon_degree, 'h', draw_x, draw_y, ITEM_DRAW_W, ITEM_DRAW_H)
 
 class Idle(State):
     def __init__(self,p):
@@ -361,10 +359,10 @@ class Character:
         }
 
         self.weapon_offset = {
-            'idle': [(5, 88),(5,85),(5,88),(5,85)],
-            'walk': [(5, 85),(-10,80),(5,85),(5,85)],
-            'run': [(5,85),(-10,80),(5,85),(5,85)],
-            'jump': [(5,80),(0,90),(-4,110),(-3,100),(2,90),(5,80)],
+            'idle': [(7, 85),(7,82),(7,85),(7,82)],
+            'walk': [(7, 85),(6,80),(7,85),(7,85)],
+            'run': [(7,85),(6,80),(7,85),(7,85)],
+            'jump': [(5,80),(0,90),(3,110),(2,100),(2,90),(5,80)],
             'attack': [(5,85), (-20, 120), (45,90), (25,85)]
         }
 
