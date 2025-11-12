@@ -1,18 +1,24 @@
 from pico2d import *
+import time
+
 stack=None
 running=True
+frame_time=0.0
 
 def run(start_mode):
-    global running,stack
+    global running,stack,frame_time
     running=True
     stack=[start_mode]
     start_mode.init()
+
+    current_time=time.time()
 
     while running:
         stack[-1].handle_events()
         stack[-1].update()
         stack[-1].draw()
-        delay(0.01)
+        frame_time=time.time()-current_time
+        current_time += frame_time
 
     while len(stack)>0:
         stack[-1].finish()
