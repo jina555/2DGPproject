@@ -7,7 +7,7 @@ import game_framework
 import game_world
 from ui_manager import UIManager
 
-CANVAS_WIDTH=1280
+CANVAS_WIDTH=1000
 CANVAS_HEIGHT=725
 RESPAWN_DELAY=7.0
 
