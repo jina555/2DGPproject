@@ -3,7 +3,7 @@ import game_framework
 import play_mode
 import random
 
-CANVAS_WIDTH=1280
+CANVAS_WIDTH=1000
 CANVAS_HEIGHT=725
 GROUND_Y=300 # 캐릭터들이 걸어갈 위치
 TRIGGER_X=CANVAS_WIDTH *(2/3)
@@ -170,7 +170,7 @@ def draw():
     else:
         for char in characters:
             char.draw()
-    title.scale=1.8
+    title.scale=1.5
 
     title.draw(CANVAS_WIDTH//2-70,CANVAS_HEIGHT-200,title.w*title.scale, title.h*title.scale)
 
