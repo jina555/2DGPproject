@@ -5,6 +5,7 @@ from item import Item
 import game_framework
 import game_world
 import math
+from effect import SwordEffect
 
 
 def a_down(e):
@@ -53,7 +54,7 @@ WEAPON_DAMAGE = {
     'WEAPON2': 60,
     'WEAPON_S': 100,
 }
-ITEM_DRAW_W, ITEM_DRAW_H = 53, 53
+ITEM_DRAW_W, ITEM_DRAW_H = 40, 40
 
 DAMAGE_BARE_HANDS=20
 class PlayerAttackBox:
@@ -83,7 +84,7 @@ class PlayerAttackBox:
         if group == 'player_attack:monster':
             pass
     def draw(self):
-        draw_rectangle(*self.get_bb(),255,0,0)
+        # draw_rectangle(*self.get_bb(),255,0,0)
         pass
 
 
@@ -265,13 +266,38 @@ class Attack:
         self.p.frame=0
         self.p.attack_time=ATTACK_TIME_PER_ACTION
         self.update_attack_box()
+        self.last_frame=-1
 
     def exit(self,e):
-        self.p.attack_home=(0,0,0,0)
+        pass
 
     def do(self):
         self.p.frame=(self.p.frame + ATTACK_FRAMES_PER_ACTION * ATTACK_ACTION_PER_TIME * game_framework.frame_time)%ATTACK_FRAMES_PER_ACTION
         self.p.attack_time -= game_framework.frame_time
+
+        current_frame = int(self.p.frame)
+        if current_frame != self.last_frame:
+
+            if current_frame == 2:
+
+                effect_type_to_spawn = 'normal'
+                if self.p.equipped_weapon == 'WEAPON_S':
+                    effect_type_to_spawn = 'special_s'
+                elif self.p.equipped_weapon is None:
+                    effect_type_to_spawn = 'bare_hand'
+
+                offset_list = self.p.weapon_offset.get('attack', self.p.weapon_offset['idle'])
+                frame_index = clamp(0, current_frame, len(offset_list) - 1)
+                base_offset_x, offset_y = offset_list[frame_index]
+                offset_x = base_offset_x * self.p.face_dir
+
+                effect_x = self.p.x + offset_x
+                effect_y = self.p.y + offset_y
+
+                effect = SwordEffect(effect_x, effect_y, self.p.face_dir, effect_type_to_spawn)
+                game_world.add_object(effect, 2)
+
+            self.last_frame = current_frame  # 현재 프레임을 기억
         if self.p.attack_time<0:
             if self.p.a_down != self.p.d_down:
                 self.p.state_machine.set_state(self.p.WALK,e=None)
@@ -526,6 +552,6 @@ class Character:
                 return
         self.state_machine.draw()
 
-        draw_rectangle(*self.get_bb(), 255, 0, 0)
+        # draw_rectangle(*self.get_bb(), 255, 0, 0)
 
 
