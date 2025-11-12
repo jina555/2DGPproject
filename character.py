@@ -377,7 +377,7 @@ class Character:
 
         self.colliding_item_list=[]
         self.inventory=[]
-        self.max_inventory_slots=24
+        self.max_inventory_slots=25
         self.equipped_weapon=None
 
         self.IDLE=Idle(self)

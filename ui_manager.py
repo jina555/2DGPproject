@@ -1,6 +1,7 @@
 from pico2d import *
 import game_world
 from pico2d import get_time
+from sdl2 import SDLK_e, SDL_KEYDOWN
 
 CANVAS_WIDTH=1280
 CANVAS_HEIGHT=725
@@ -34,12 +35,6 @@ class UIManager:
 
         self.bag_icon_rect=self.calculate_rect(BAG_ICON_X,BAG_ICON_Y,BAG_ICON_W,BAG_ICON_H)
         self.inv_panel_rect=self.calculate_rect(INV_X,INV_Y,INV_W,INV_H)
-        inv_left,_,_,inv_top=self.inv_panel_rect
-
-        close_btn_left=inv_left+(SLOT_SIZE *4)
-        close_btn_top=inv_top
-
-        self.close_button_rect=(close_btn_left,close_btn_top-SLOT_SIZE,close_btn_left + SLOT_SIZE,close_btn_top)
 
         self.last_click_time=0.0
         self.last_clicked_slot=-1
@@ -75,6 +70,11 @@ class UIManager:
         return -1
 
     def handle_event(self,event):
+       if event.type == SDL_KEYDOWN and event.key == SDLK_e:
+            if self.is_inventory_open:
+                self.is_inventory_open=False
+                return True
+
        if event.type in (SDL_MOUSEMOTION, SDL_MOUSEBUTTONDOWN,SDL_MOUSEBUTTONUP):
            mx,my=event.x,CANVAS_HEIGHT-event.y
        else:
@@ -90,44 +90,25 @@ class UIManager:
                if event.button==SDL_BUTTON_LEFT:
                    self.is_inventory_open=not self.is_inventory_open
                return True
+
        if self.is_inventory_open:
-           if event.type == SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT:
+           if event.type==SDL_MOUSEBUTTONDOWN and event.button == SDL_BUTTON_LEFT and self.is_mouse_in_rect(mx,my,self.inv_panel_rect):
 
-               clicked_slot_index = self.get_slot_index_from_mouse(mx, my)
+               slot_index=self.get_slot_index_from_mouse(mx,my)
+               if slot_index != -1:
+                   current_time=get_time()
+                   is_double_click=(current_time - self.last_click_time < self.DOUBLE_CLICK_TIME) and (self.last_clicked_slot == slot_index)
 
-               if clicked_slot_index == -1:
-                   return False
-
-               if clicked_slot_index == 4:
-                   self.is_inventory_open = False
-                   return True
-
-               inventory_index = -1
-               if 0 <= clicked_slot_index <= 3:
-                   inventory_index = clicked_slot_index
-               elif 5 <= clicked_slot_index <= 24:
-                   inventory_index = clicked_slot_index - 1
-
-
-               if 0 <= inventory_index < len(self.player.inventory):
-
-                   # 2-5. 더블클릭 판정
-                   current_time = get_time()
-                   if (current_time - self.last_click_time < self.DOUBLE_CLICK_TIME) and \
-                           (self.last_clicked_slot == clicked_slot_index):
-
-                       print(f"Double-clicked slot {clicked_slot_index} -> inv_index {inventory_index}")
-
-                       # (핵심) 플레이어의 아이템 장착 함수 호출
-                       self.player.equip_item(inventory_index)
-
-                       self.last_click_time = 0
-                       self.last_clicked_slot = -1
+                   if is_double_click:
+                       is_item_click=(0 <= slot_index<len(self.player.inventory))
+                       if is_item_click:
+                           self.player.equip_item(slot_index)
+                       else:
+                           self.player.unequip_item()
                    else:
-
-                       self.last_click_time = current_time
-                       self.last_clicked_slot = clicked_slot_index
-                   return True
+                       self.last_click_time=current_time
+                       self.last_clicked_slot=slot_index
+               return True
 
            if self.is_mouse_in_rect(mx, my, self.inv_panel_rect):
                return True
@@ -154,8 +135,6 @@ class UIManager:
 
         for i, item_type in enumerate(self.player.inventory):
             slot_index = i
-            if i >= 4:
-                slot_index = i + 1
 
             row = slot_index // 5
             col = slot_index % 5
