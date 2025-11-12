@@ -9,18 +9,18 @@ from ui_manager import UIManager
 
 CANVAS_WIDTH=1280
 CANVAS_HEIGHT=725
-
-
+RESPAWN_DELAY=7.0
 
 player= None
 grass_map=None
 grass=None
 ui_manager=None
 monsters=[]
+respawn_timer=0.0
 
 
 def init():
-    global player, game_map, grass,ui_manager,monsters
+    global player, game_map, grass,ui_manager,monsters,respawn_timer
 
     game_map = Map()
     player = Character()
@@ -45,16 +45,19 @@ def init():
         game_world.add_collision_pair('player:monster',None,m)
         game_world.add_collision_pair('player_attack:monster',None,m)
 
+    respawn_timer=0.0
+
 
     pass
 def finish():
-    global player,game_map,grass,ui_manager,monsters
+    global player,game_map,grass,ui_manager,monsters,respawn_timer
     game_world.clear()
     player=None
     game_map=None
     grass=None
     ui_manager=None
     monsters=[]
+    respawn_timer=0.0
 
 
 def handle_events():
@@ -73,8 +76,31 @@ def handle_events():
 
 
 def update():
+    global respawn_timer
     game_world.update()
     game_world.handle_collisions()
+
+    monster_count = 0
+
+    for o in game_world.world[1]:
+        if isinstance(o, Monster):
+            monster_count += 1
+
+    if monster_count < 5:
+        respawn_timer -= game_framework.frame_time  # 딜레이 타이머 감소
+
+        # 타이머가 0 이하가 되면 몬스터 생성
+        if respawn_timer <= 0:
+            print("Respawning monster...")
+            new_monster = Monster()
+            game_world.add_object(new_monster, 1)
+
+            game_world.add_collision_pair('player:monster', player, new_monster)
+            game_world.add_collision_pair('player_attack:monster', None, new_monster)
+
+            respawn_timer = RESPAWN_DELAY
+    else:
+        respawn_timer = 0.0
 
     pass
 
