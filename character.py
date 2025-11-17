@@ -346,6 +346,9 @@ class Character:
 
         self.invincible_timer=0.0
 
+        self.max_hp=100
+        self.hp=100
+
         self.img_idle=load_image('res/idle.png')
         self.img_move=load_image('res/character_MOVE.png')
         self.img_run=load_image('res/character_MOVE.png')
@@ -468,6 +471,9 @@ class Character:
             return
         if group == 'player:monster':
             print("PLAYER collided with MONSTER")
+            self.hp-=10
+            if self.hp<0:self.hp=0
+            print(f"Player Hp:{self.hp}")
             self.invincible_timer=0.5
             if self.face_dir==1:
                 self.x-=10
@@ -543,13 +549,9 @@ class Character:
             self.x=w-half
 
     def draw(self):
-        if self.invincible_timer>0:
-            if int(get_time()*10)%2==0:
-                pass
-            else:
-                return
-        self.state_machine.draw()
+       self.state_machine.draw()
 
         # draw_rectangle(*self.get_bb(), 255, 0, 0)
+
 
 

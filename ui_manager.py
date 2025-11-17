@@ -24,6 +24,11 @@ class UIManager:
         self.bag_icon_image=load_image('res/bag.png')
         self.inventory_image=load_image('res/inventory.png')
 
+        self.image_hp_text = load_image('res2/hp_1.png')
+        self.image_hp_bar = load_image('res2/hp_2.png')
+        self.hp_base_x = 50
+        self.hp_base_y = 40
+
         self.item_images = {
             'WEAPON1': load_image('item/무기1.png'),
             'WEAPON2': load_image('item/무기2.png'),
@@ -118,6 +123,7 @@ class UIManager:
     def update(self):
         pass
     def draw(self):
+        self.draw_hp_bar()
         current_w=BAG_ICON_W * self.bag_icon_scale
         current_h=BAG_ICON_H * self.bag_icon_scale
         self.bag_icon_image.draw(BAG_ICON_X,BAG_ICON_Y,current_w,current_h)
@@ -125,6 +131,27 @@ class UIManager:
         if self.is_inventory_open:
             self.inventory_image.draw(INV_X,INV_Y,INV_W,INV_H)
             self.draw_inventory_items()
+
+    def draw_hp_bar(self):
+        self.image_hp_text.draw(self.hp_base_x, self.hp_base_y, 40, 20)
+
+
+        bar_max_width = 200
+        bar_height = 20
+
+        if self.player:
+            safe_hp = max(0, self.player.hp)
+            hp_ratio = safe_hp / self.player.max_hp
+            current_bar_width = int(bar_max_width * hp_ratio)
+
+
+            bar_start_x = self.hp_base_x + 30
+            bar_center_x = bar_start_x + (current_bar_width // 2)
+
+            if current_bar_width > 0:
+                self.image_hp_bar.draw(bar_center_x, self.hp_base_y, current_bar_width, bar_height)
+
+
 
     def draw_inventory_items(self):
 
