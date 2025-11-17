@@ -346,8 +346,8 @@ class Character:
 
         self.invincible_timer=0.0
 
-        self.max_hp=100
-        self.hp=100
+        self.max_hp=500
+        self.hp=500
 
         self.img_idle=load_image('res/idle.png')
         self.img_move=load_image('res/character_MOVE.png')
@@ -471,7 +471,7 @@ class Character:
             return
         if group == 'player:monster':
             print("PLAYER collided with MONSTER")
-            self.hp-=10
+            self.hp-=5
             if self.hp<0:self.hp=0
             print(f"Player Hp:{self.hp}")
             self.invincible_timer=0.5

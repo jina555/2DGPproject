@@ -136,7 +136,7 @@ class UIManager:
         self.image_hp_text.draw(self.hp_base_x, self.hp_base_y, 40, 20)
 
 
-        bar_max_width = 200
+        bar_max_width = 500
         bar_height = 20
 
         if self.player:
