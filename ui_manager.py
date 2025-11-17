@@ -6,8 +6,8 @@ from sdl2 import SDLK_e, SDL_KEYDOWN
 CANVAS_WIDTH=1000
 CANVAS_HEIGHT=725
 
-BAG_ICON_X = 800
-BAG_ICON_Y = 70
+BAG_ICON_X = 620
+BAG_ICON_Y = 40
 BAG_ICON_W, BAG_ICON_H=70,70
 BAG_SCALE_NORMAL=1.0
 BAG_SCALE_HOVER=1.1
@@ -32,7 +32,8 @@ class UIManager:
         self.item_images = {
             'WEAPON1': load_image('item/무기1.png'),
             'WEAPON2': load_image('item/무기2.png'),
-            'WEAPON_S': load_image('item/무기s.png')
+            'WEAPON_S': load_image('item/무기s.png'),
+            'POTION1': load_image('item/potion1.png'),
         }
 
         self.bag_icon_scale=BAG_SCALE_NORMAL

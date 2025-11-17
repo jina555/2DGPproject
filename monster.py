@@ -210,7 +210,9 @@ class Monster:
         roll=random.random()
         item_to_drop=None
 
-        if roll < 0.05:
+        if roll < 0.2:
+            item_to_drop='POTION1'
+        elif roll < 0.25:
             item_to_drop='WEAPON_S'
         elif roll < 0.5:
             if random.random() < 0.25:
@@ -218,7 +220,7 @@ class Monster:
             else:
                 item_to_drop='WEAPON2'
 
-        if item_to_drop:  # 아이템을 드랍하기로 결정됐다면
+        if item_to_drop:
             print(f"Dropping {item_to_drop}")
             new_item = Item(self.x, 190, item_to_drop)
             game_world.add_object(new_item, 1)
@@ -227,7 +229,6 @@ class Monster:
             if player:
                 game_world.add_collision_pair('player:item', player, new_item)
             else:
-                # 혹시 모르니 player가 없을 경우의 처리
                 game_world.add_collision_pair('player:item', None, new_item)
 
 

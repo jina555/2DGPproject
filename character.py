@@ -508,10 +508,22 @@ class Character:
             print("Invalid inventory index")
             return
 
+        item_type=self.inventory[inventory_index]
+
+        if item_type == 'POTION1':
+            print("Used Potion! HP restored.")
+            self.hp += 10
+            if self.hp > self.max_hp:
+                self.hp = self.max_hp
+
+            self.inventory.pop(inventory_index)
+            return
+
 
         item_to_equip = self.inventory[inventory_index]
         old_equipped_weapon=self.equipped_weapon
         self.equipped_weapon=item_to_equip
+
 
 
         if old_equipped_weapon :

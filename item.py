@@ -16,7 +16,9 @@ class Item:
             item_images={
                 'WEAPON1': load_image('item/무기1.png'),
                 'WEAPON2': load_image('item/무기2.png'),
-                'WEAPON_S': load_image('item/무기s.png')
+                'WEAPON_S': load_image('item/무기s.png'),
+
+                'POTION1': load_image('item/potion1.png'),
             }
     def update(self):
         pass
