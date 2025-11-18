@@ -165,14 +165,14 @@ def update():
     game_world.update()
     game_world.handle_collisions()
     current_info=STAGE[current_stage_index]
+    if current_info['type'] == 'boss':
+        if portal is None and monsters and monsters[0].hp <= 0:
+            print('Boss Defeated! Portal Open!')
 
-    if current_info['type']=='boss':
-        if portal is None:
-            if monsters and monsters[0].hp <=0:
-                print('boss defeated, portal open')
-                if current_info['portal']:
-                    portal=Portal(*current_info['portal'])
-                    game_world.add_object(portal,1)
+            px, py = current_info['portal']
+
+            portal = Portal(px, py)
+            game_world.add_object(portal, 1)
 
     if portal and collide(player, portal) and player.w_down:
         next_idx = current_info['next_stage']
