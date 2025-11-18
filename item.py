@@ -2,6 +2,12 @@ from pico2d import *
 import game_world
 import game_framework
 
+WEAPON_DAMAGE = {
+    'WEAPON1': 40,
+    'WEAPON2': 60,
+    'WEAPON_S': 100,
+}
+
 item_images=None
 ITEM_W,ITEM_H=35,35
 

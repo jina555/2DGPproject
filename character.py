@@ -1,7 +1,7 @@
 from pico2d import *
 from sdl2 import SDL_KEYDOWN,SDL_KEYUP,SDLK_a,SDLK_d,SDLK_LSHIFT,SDLK_SPACE,SDLK_RSHIFT,SDL_BUTTON_LEFT,SDL_MOUSEBUTTONDOWN,SDLK_w
 from state_machine import StateMachine,State
-from item import Item
+from item import Item, WEAPON_DAMAGE
 import game_framework
 import game_world
 import math
@@ -49,13 +49,7 @@ ATTACK_W=20 #공격박스 가로
 ATTACK_H=30 #공격박스 세로
 GRAVITY=1800
 
-WEAPON_DAMAGE = {
-    'WEAPON1': 40,
-    'WEAPON2': 60,
-    'WEAPON_S': 100,
-}
 ITEM_DRAW_W, ITEM_DRAW_H = 53, 53
-
 DAMAGE_BARE_HANDS=20
 class PlayerAttackBox:
     def __init__(self, char_x, char_y, face_dir,damage):
