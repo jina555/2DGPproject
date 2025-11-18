@@ -1,5 +1,5 @@
 from pico2d import *
-from sdl2 import SDL_KEYDOWN,SDL_KEYUP,SDLK_a,SDLK_d,SDLK_LSHIFT,SDLK_SPACE,SDLK_RSHIFT,SDL_BUTTON_LEFT,SDL_MOUSEBUTTONDOWN
+from sdl2 import SDL_KEYDOWN,SDL_KEYUP,SDLK_a,SDLK_d,SDLK_LSHIFT,SDLK_SPACE,SDLK_RSHIFT,SDL_BUTTON_LEFT,SDL_MOUSEBUTTONDOWN,SDLK_w
 from state_machine import StateMachine,State
 from item import Item
 import game_framework
@@ -372,6 +372,7 @@ class Character:
         self.a_down=False
         self.d_down=False
         self.shift_down=False
+        self.w_down=False
 
         self.attack_time=0
         self.attack_box=(0,0,0,0)
@@ -429,6 +430,8 @@ class Character:
                 self.jump()
             elif event.key ==SDLK_f:
                 self.try_pickup()
+            elif event.key ==SDLK_w:
+                self.w_down=True
 
 
         elif event.type==SDL_KEYUP:
@@ -438,6 +441,8 @@ class Character:
                 self.d_down=False
             elif event.key==SDLK_LSHIFT:
                 self.shift_down=False
+            elif event.key==SDLK_w:
+                self.w_down=False
 
         elif event.type==SDL_MOUSEBUTTONDOWN and event.button==SDL_BUTTON_LEFT:
             self.start_attack()

@@ -4,8 +4,8 @@ from pico2d import *
 GROUND_Y=80
 
 class Map:
-    def __init__(self):
-        self.image=load_image('res/map1.png')
+    def __init__(self,map_name='res/map1.png'):
+        self.image=load_image(map_name)
         self.w=self.image.w
         self.h=self.image.h
 

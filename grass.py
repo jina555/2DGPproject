@@ -3,8 +3,8 @@ from character import GROUND_Y
 import play_mode
 
 class Grass:
-    def __init__(self):
-        self.image = load_image('res/grass.png')
+    def __init__(self,name='res/grass.png'):
+        self.image = load_image(name)
         self.h=self.image.h
         self.y=GROUND_Y
         self.w=self.image.w
