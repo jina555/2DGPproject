@@ -31,7 +31,7 @@ STAGE={
 
 CANVAS_WIDTH=1000
 CANVAS_HEIGHT=725
-RESPAWN_DELAY=5.0
+RESPAWN_DELAY=3.0
 
 player= None
 game_map=None
@@ -187,9 +187,9 @@ def update():
                 monster_count+=1
 
         if monster_count < 5:
-            respawn_timer -= game_framework.frame_time  # 딜레이 타이머 감소
+            respawn_timer -= game_framework.frame_time
 
-            # 타이머가 0 이하가 되면 몬스터 생성
+
             if respawn_timer <= 0:
                 print("Respawning monster...")
                 new_monster = Monster()
