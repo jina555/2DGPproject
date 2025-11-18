@@ -485,20 +485,29 @@ class Character:
             pass
 
     def try_pickup(self):
-        if self.colliding_item_list:
-            item_to_pick = self.colliding_item_list[0]
-            if self.add_to_inventory(item_to_pick):
-                print(f"Picking up item: {item_to_pick.item_type}")
-                game_world.remove_object(item_to_pick)
-            else:
-                print('inventory full! cannot pick up item.')
+        for item in self.colliding_item_list:
+            if self.add_to_inventory(item):
+                game_world.remove_object(item)
 
+                self.colliding_item_list.remove(item)
+
+                return
     def add_to_inventory(self, item):
-        if len(self.inventory) < self.max_inventory_slots:
+        if item.item_type.startswith('WEAPON'):
 
+            if self.equipped_weapon == item.item_type:
+                print(f"Already equipped {item.item_type}.")
+                return False
+
+            if item.item_type in self.inventory:
+                print(f"Already have {item.item_type} in bag.")
+                return False
+
+        if len(self.inventory) < self.max_inventory_slots:
             self.inventory.append(item.item_type)
-            print(f"Inventory: {self.inventory}")  # 콘솔에서 확인용
-            return True  # 추가 성공
+            print(f"Inventory: {self.inventory}")
+            return True
+        print("inventory is full")
         return False
 
     def equip_item(self, inventory_index):
@@ -511,26 +520,20 @@ class Character:
 
         if item_type == 'POTION1':
             print("Used Potion! HP restored.")
-            self.hp += 10
+            self.hp += 10#회복량
             if self.hp > self.max_hp:
                 self.hp = self.max_hp
 
             self.inventory.pop(inventory_index)
             return
-
-
         item_to_equip = self.inventory[inventory_index]
         old_equipped_weapon=self.equipped_weapon
         self.equipped_weapon=item_to_equip
-
-
 
         if old_equipped_weapon :
             self.inventory[inventory_index]=old_equipped_weapon
         else:
             self.inventory.pop(inventory_index)
-
-
 
     def update(self):
         self.colliding_item_list=[]
