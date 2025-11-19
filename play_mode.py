@@ -8,6 +8,7 @@ import game_world
 from ui_manager import UIManager
 from portal import Portal
 from boss import Boss1
+from npc import Friend
 
 STAGE={
     1:{
@@ -24,7 +25,8 @@ STAGE={
         'map':'res2/bg2.png',
         'grass':'res/grass.png',
         'portal':(950,230),
-        'next_stage':3
+        'next_stage':3,
+        'friend_image':'res2/f1.png'
     },
     3:{
         'type':'normal',
@@ -180,9 +182,11 @@ def update():
             print('Boss Defeated! Portal Open!')
 
             px, py = current_info['portal']
-
             portal = Portal(px, py)
             game_world.add_object(portal, 1)
+            f_img=current_info.get('friend_image','res2/f1.png')
+            friend = Friend(750, 260, f_img)
+            game_world.add_object(friend, 1)
 
     if portal and collide(player, portal) and player.w_down:
         next_idx = current_info['next_stage']
