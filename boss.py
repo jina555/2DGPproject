@@ -5,9 +5,31 @@ import game_framework
 import game_world
 import random
 
-GRAVITY=2500
-RUSH_SPEED=700
-JUMP_SPEED=1000
+PIXEL_PER_METER = (64.0 / 1.75)
+
+WALK_SPEED_KMPH = 5.0
+WALK_SPEED_PPS = (WALK_SPEED_KMPH * 1000.0 / 60.0 / 60.0) * PIXEL_PER_METER
+
+RUSH_SPEED_KMPH = 40.0
+RUSH_SPEED_PPS = (RUSH_SPEED_KMPH * 1000.0 / 60.0 / 60.0) * PIXEL_PER_METER
+
+JUMP_SPEED_MPS = 15.0
+JUMP_SPEED = JUMP_SPEED_MPS * PIXEL_PER_METER
+
+GRAVITY_MPS = 30.0
+GRAVITY = GRAVITY_MPS * PIXEL_PER_METER
+
+BOSS_IDLE_TIME_PER_ACTION = 1.0
+BOSS_IDLE_ACTION_PER_TIME = 1.0 / BOSS_IDLE_TIME_PER_ACTION
+
+BOSS_WALK_TIME_PER_ACTION = 1.5
+BOSS_WALK_ACTION_PER_TIME = 1.0 / BOSS_WALK_TIME_PER_ACTION
+
+BOSS_RUSH_TIME_PER_ACTION = 0.5
+BOSS_RUSH_ACTION_PER_TIME = 1.0 / BOSS_RUSH_TIME_PER_ACTION
+
+BOSS_SMASH_TIME_PER_ACTION = 0.5
+BOSS_SMASH_ACTION_PER_TIME = 1.0 / BOSS_SMASH_TIME_PER_ACTION
 
 class BossSleep(State):
     def __init__(self, boss):
@@ -28,6 +50,7 @@ class BossSleep(State):
 
     def draw(self):
         self.boss.draw_body()
+
 class BossIdle(State):
     def __init__(self, boss):
         self.boss = boss
@@ -39,7 +62,8 @@ class BossIdle(State):
         self.timer = 1.0
 
     def do(self):
-        self.boss.frame = (self.boss.frame + 4 * game_framework.frame_time)
+        total_frames = len(self.boss.images)
+        self.boss.frame = (self.boss.frame + total_frames * BOSS_IDLE_ACTION_PER_TIME * game_framework.frame_time)
         self.timer -= game_framework.frame_time
         if self.timer <= 0:
             self.boss.decide_action()  # 행동 결정
@@ -56,14 +80,16 @@ class BossWalk(State):
         player = game_world.get_player()
         if player:
             self.boss.face_dir = 1 if player.x > self.boss.x else -1
-        self.boss.vx = 100 * self.boss.face_dir
+        self.boss.vx = WALK_SPEED_PPS * self.boss.face_dir
         self.timer = 2.0
 
     def do(self):
         self.boss.x += self.boss.vx * game_framework.frame_time
-        self.boss.frame = (self.boss.frame + 8 * game_framework.frame_time)
         self.timer -= game_framework.frame_time
         self.boss.x = clamp(50, self.boss.x, 950)
+        total_frames=len(self.boss.images)
+        self.boss.frame=(self.boss.frame + total_frames * BOSS_WALK_ACTION_PER_TIME* game_framework.frame_time)
+        self.timer -=game_framework.frame_time
         if self.timer <= 0:
             self.boss.decide_action()
 
@@ -80,14 +106,16 @@ class BossRush(State):
         player = game_world.get_player()
         if player:
             self.boss.face_dir = 1 if player.x > self.boss.x else -1
-        self.boss.vx = RUSH_SPEED * self.boss.face_dir
+        self.boss.vx = RUSH_SPEED_PPS * self.boss.face_dir
         self.timer = 1.5
 
     def do(self):
         self.boss.x += self.boss.vx * game_framework.frame_time
-        self.boss.frame = (self.boss.frame + 16 * game_framework.frame_time)
         self.timer -= game_framework.frame_time
         self.boss.x = clamp(50, self.boss.x, 950)
+        total_frames = len(self.boss.images)
+        self.boss.frame = (self.boss.frame + total_frames * BOSS_RUSH_ACTION_PER_TIME * game_framework.frame_time)
+        self.timer -= game_framework.frame_time
         if self.timer <= 0:
             self.boss.state_machine.set_state(self.boss.idle_state, e=None)
 
@@ -103,11 +131,14 @@ class Boss1Smash(State):
         self.boss.vy = JUMP_SPEED
         self.boss.vx = 0
         self.boss.on_ground = False
+        self.frame=0
 
     def do(self):
         dt = game_framework.frame_time
         self.boss.vy -= GRAVITY * dt
         self.boss.y += self.boss.vy * dt
+        total_frames = len(self.boss.images)
+        self.boss.frame = (self.boss.frame + total_frames * BOSS_SMASH_ACTION_PER_TIME * dt)
 
         if self.boss.y <= 250:  # 땅에 착지
             self.boss.y = 250
@@ -198,8 +229,8 @@ class Boss1(Boss):
             load_image('boss1/bigslim_03.png'),
         ]
 
-        self.max_hp=500
-        self.hp=500 #보스 체력 나중에 수정
+        self.max_hp=100
+        self.hp=100 #보스 체력 나중에 수정
         self.damage=30#나중에 수정
         self.width=200
         self.height=200
