@@ -11,7 +11,7 @@ class Portal:
         pass
 
     def draw(self):
-        self.image.draw(self.x,self.y)
+        self.image.draw(self.x,self.y,114,117)
 
     def get_bb(self):
-        return self.x-50,self.y-20,self.x+50,self.y+20
+        return self.x-65,self.y-65,self.x+65,self.y+65
