@@ -8,7 +8,7 @@ import game_world
 from ui_manager import UIManager
 from portal import Portal
 from boss import Boss1
-from npc import Friend
+from npc import Friend,HpIcon
 
 STAGE={
     1:{
@@ -26,7 +26,9 @@ STAGE={
         'grass':'res/grass.png',
         'portal':(950,230),
         'next_stage':3,
-        'friend_image':'res2/f1.png'
+        'friend_image':'res2/f1.png',
+        'reward_hp':200
+
     },
     3:{
         'type':'normal',
@@ -165,11 +167,19 @@ def handle_events():
             game_framework.quit()
         elif event.type == SDL_KEYDOWN and event.key == SDLK_ESCAPE:
             game_framework.quit()
-        if ui_manager.handle_event(event):
+        ui_handled = False
+        for obj in game_world.world[2]:
+            if hasattr(obj, 'handle_event'):
+                if obj.handle_event(event):
+                    ui_handled = True
+        if ui_handled:
             continue
-        else:
-            player.handle_event(event)
-    pass
+
+        for obj in game_world.world[1]:
+            if hasattr(obj, 'handle_event'):
+                obj.handle_event(event)
+
+        player.handle_event(event)
 
 
 def update():
@@ -185,7 +195,8 @@ def update():
             portal = Portal(px, py)
             game_world.add_object(portal, 1)
             f_img=current_info.get('friend_image','res2/f1.png')
-            friend = Friend(750, 260, f_img)
+            r_val=current_info.get('reward_value',200)
+            friend = Friend(750, 260, f_img,r_val)
             game_world.add_object(friend, 1)
 
     if portal and collide(player, portal) and player.w_down:

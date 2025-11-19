@@ -1,12 +1,13 @@
 from pico2d import *
 import game_world
 import game_framework
-from sdl2 import SDL_KEYDOWN,SDLK_f
+from sdl2 import SDL_KEYDOWN,SDLK_f,SDLK_r
 
 class Friend: # 구출 대상
-    def __init__(self,x,y,image_name):
+    def __init__(self,x,y,image_name,reward_value):
         self.x, self.y=x,y
         self.image=load_image(image_name)
+        self.reward_value=reward_value
         pass
     def update(self):
         pass
@@ -19,7 +20,37 @@ class Friend: # 구출 대상
             player=game_world.get_player()
             distance=((self.x-player.x)**2+(self.y-player.y)**2)**0.5
 
-            if distance < 100:
+            if distance < 200:
                 game_world.remove_object(self)
+                hp_icon = HpIcon(710, 50, self.reward_value)
+                game_world.add_object(hp_icon, 2)
 
         pass
+
+class HpIcon:
+    def __init__(self,x,y,value):
+        self.image=load_image('res2/hp_up.png')
+        self.x,self.y=x,y
+        self.value=value
+        self.width,self.height=50,50
+        pass
+    def update(self):
+        pass
+    def draw(self):
+        scale=3
+        self.image.draw(self.x,self.y,self.image.w*scale,self.image.h*scale)
+        pass
+    def handle_event(self,event):
+        if event.type == SDL_KEYDOWN and event.key == SDLK_r:
+            self.use_item()
+            return
+        pass
+    def use_item(self):
+        player = game_world.get_player()
+        if player:
+            player.max_hp += self.value
+            player.hp += self.value
+            player.hp = player.max_hp
+        game_world.remove_object(self)
+        pass
+
