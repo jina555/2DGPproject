@@ -18,6 +18,20 @@ def space_down(e):
     return e and e[0]=='INPUT' and e[1].type==SDL_KEYDOWN and e[1].key==SDLK_SPACE
 def rmb_down(e):
     return e and e[0]=='INPUT' and e[1].type==SDL_MOUSEBUTTONDOWN and e[1].button==SDL_BUTTON_LEFT
+PIXEL_PER_METER = (64.0 / 1.75)
+RUN_SPEED_KMPH = 25.0
+RUN_SPEED_MPM = (RUN_SPEED_KMPH * 1000.0 / 60.0)
+RUN_SPEED_MPS = (RUN_SPEED_MPM / 60.0)
+RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
+
+MOVE_SPEED_RUN = RUN_SPEED_PPS
+MOVE_SPEED_WALK = RUN_SPEED_PPS * 0.5
+
+JUMP_SPEED_MPS = 10.0
+JUMP_SPEED = JUMP_SPEED_MPS * PIXEL_PER_METER
+
+GRAVITY_MPS = 25.0
+GRAVITY = GRAVITY_MPS * PIXEL_PER_METER
 
 IDLE_FRAMES_PER_ACTION=4
 IDLE_TIME_PER_ACTION=1.0
@@ -39,15 +53,12 @@ JUMP_FRAMES_PER_ACTION=6
 JUMP_TIME_PER_ACTION=0.6
 JUMP_ACTION_PER_TIME=1.0/JUMP_TIME_PER_ACTION
 
-MOVE_SPEED_RUN=200
-MOVE_SPEED_WALK=100
-JUMP_SPEED=700
+
 W,H=32,64 #캐릭터 크기
 GROUND_Y=80
 ATTACK_ACTIVE=0.15 #히트박스 유지 시간
 ATTACK_W=20 #공격박스 가로
 ATTACK_H=30 #공격박스 세로
-GRAVITY=1800
 
 ITEM_DRAW_W, ITEM_DRAW_H = 53, 53
 DAMAGE_BARE_HANDS=20
@@ -81,7 +92,6 @@ class PlayerAttackBox:
         # draw_rectangle(*self.get_bb(),255,0,0)
         pass
 
-
 def _draw_weapon(p, state_name):
     if not p.equipped_weapon:
         return
@@ -89,7 +99,6 @@ def _draw_weapon(p, state_name):
     weapon_image = p.item_images.get(p.equipped_weapon)
     if not weapon_image:
         return
-
 
     offset_list = p.weapon_offset.get(state_name, p.weapon_offset['idle'])
 
@@ -129,7 +138,6 @@ class Idle(State):
         _draw_weapon(self.p,'idle')
     pass
 
-
 class Walk(State):
     def __init__(self,p):
         self.p=p
@@ -143,20 +151,19 @@ class Walk(State):
         pass
 
     def do(self):
+        self.p.vx=0
         if self.p.a_down and not self.p.d_down:
-            self.p.vx=-MOVE_SPEED_WALK; self.p.face_dir=-1
+            self.p.face_dir=-1
         elif self.p.d_down and not self.p.a_down:
-            self.p.vx=MOVE_SPEED_WALK; self.p.face_dir=1
+            self.p.face_dir=1
         else:
-            self.p.vx=0
             self.p.state_machine.set_state(self.p.IDLE,e=None)
             return
+        self.p.x+=self.p.face_dir * MOVE_SPEED_WALK * game_framework.frame_time
         if self.p.shift_down:
             self.p.state_machine.set_state(self.p.RUN, e=None)
             return
         self.p.frame=(self.p.frame + WALK_FRAMES_PER_ACTION * WALK_ACTION_PER_TIME * game_framework.frame_time)%WALK_FRAMES_PER_ACTION
-
-
 
     def draw(self):
         scale=3
@@ -175,24 +182,23 @@ class Run:
     def __init__(self,p):
         self.p=p
     def enter(self,e):
+        self.p.vx=0
         pass
 
     def exit(self,e):
         pass
     def do(self):
         if not self.p.shift_down:
-            self.p.vx = 0
             self.p.state_machine.set_state(self.p.IDLE, e=None)
             return
-
 
         if self.p.a_down and not self.p.d_down:
             self.p.face_dir = -1
         elif self.p.d_down and not self.p.a_down:
             self.p.face_dir = 1
 
-
-        self.p.vx = MOVE_SPEED_RUN * self.p.face_dir
+        self.p.vx=0
+        self.p.x += self.p.face_dir * RUN_SPEED_PPS * game_framework.frame_time
         self.p.frame = (self.p.frame + RUN_FRAMES_PER_ACTION * RUN_ACTION_PER_TIME * game_framework.frame_time) % RUN_FRAMES_PER_ACTION
 
         if self.p.space_down:
@@ -227,6 +233,17 @@ class Jump:
         self.p.frame = self.p.frame + JUMP_FRAMES_PER_ACTION * JUMP_ACTION_PER_TIME * game_framework.frame_time
         if self.p.frame >= JUMP_FRAMES_PER_ACTION:
             self.p.frame = JUMP_FRAMES_PER_ACTION - 1
+
+        self.p.vx = 0
+        if self.p.a_down and not self.p.d_down:
+            self.p.face_dir = -1
+
+            self.p.x -= MOVE_SPEED_RUN * game_framework.frame_time
+
+        elif self.p.d_down and not self.p.a_down:
+            self.p.face_dir = 1
+
+            self.p.x += MOVE_SPEED_RUN * game_framework.frame_time
 
 
         if self.p.on_ground:
