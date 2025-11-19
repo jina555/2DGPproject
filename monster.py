@@ -6,7 +6,8 @@ import random
 from item import Item
 import math
 
-WALK_FRAMES_PER_ACTION=5
+
+WALK_FRAMES_PER_ACTION=4
 WALK_TIME_PER_ACTION=1.0
 WALK_ACTION_PER_TIME=1.0/WALK_TIME_PER_ACTION
 
@@ -24,11 +25,14 @@ HP_BAR_MAX_WIDTH = 50
 HP_BAR_HEIGHT = 5
 HP_BAR_Y_OFFSET = 5
 
-class SlimeWalk(State):
+
+class Walk(State):
     def __init__(self,p):
         self.p=p
+        pass
     def enter(self,e):
         self.p.vx= MOVE_SPEED * self.p.face_dir
+        pass
     def exit(self,e):
         pass
     def do(self):
@@ -47,12 +51,12 @@ class SlimeWalk(State):
             self.p.img_walk.clip_composite_draw(int(self.p.frame)*W,0,W,H,0,'h',self.p.x,self.p.y,W*3,H*3)
         else:
             self.p.img_walk.clip_draw(int(self.p.frame)*W,0,W,H,self.p.x,self.p.y,W*3,H*3)
-
         pass
     pass
-class SlimeAttack(State):
+class Attack(State):
     def __init__(self,p):
         self.p=p
+        pass
     def enter(self,e):
         print("monster:attack")
         self.p.vx=0
@@ -67,6 +71,7 @@ class SlimeAttack(State):
         self.p.attack_timer -=game_framework.frame_time
         if self.p.attack_timer <0:
             self.p.state_machine.set_state(self.p.WALK, e=None)
+
         pass
     def draw(self):
         frame_to_draw=min(int(self.p.frame), ATTACK_FRAMES_PER_ACTION-1)
@@ -76,9 +81,10 @@ class SlimeAttack(State):
             self.p.img_attack.clip_draw(frame_to_draw*W,0,W,H,self.p.x,self.p.y,W*3,H*3)
         pass
     pass
-class SlimeHurt(State):
+class Hurt(State):
     def __init__(self,p):
         self.p=p
+        pass
     def enter(self,e):
         print('monster:hurt')
         self.p.vx=0
@@ -131,62 +137,129 @@ class Monster:
         monster_half_h = (H * 3) // 2
         self.y = 161 + monster_half_h
         self.frame=0.0
-
         self.max_hp=100
         self.hp=100
+        self.hp_y_offset=HP_BAR_Y_OFFSET
 
         if Monster.hp_bar_image is None:
             Monster.hp_bar_image=load_image('res/hp_bar.png')
         if Monster.hp_bg_image is None:
             Monster.hp_bg_image=load_image('res2/hp_3.png')
+
+        self.WALK=Walk(self)
+        self.ATTACK=Attack(self)
+        self.HURT=Hurt(self)
+        self.DIE=Die(self)
+
+
+        self.state_machine=StateMachine(start_state=self.WALK,transitions={})
+
         pass
 
     def update(self):
         self.state_machine.update()
+        pass
     def draw(self):
         self.state_machine.draw()
+
         if self.state_machine.current != self.DIE:
-            self.draw_hp_bar()
+            _, _, _, top = self.get_bb()
+            bar_y = top + self.hp_y_offset
 
-    def draw_hp_bar(self):
-        _, _, _, top = self.get_bb()
-        bar_y = top + HP_BAR_Y_OFFSET
-        bar_left_edge = self.x - (HP_BAR_MAX_WIDTH // 2)
-        bar_center_x_full = bar_left_edge + (HP_BAR_MAX_WIDTH // 2)
+            bar_left_edge = self.x - (HP_BAR_MAX_WIDTH // 2)
+            bar_center_x_full = bar_left_edge + (HP_BAR_MAX_WIDTH // 2)
 
-        if Monster.hp_bg_image:
-            Monster.hp_bg_image.draw(bar_center_x_full, bar_y, HP_BAR_MAX_WIDTH, HP_BAR_HEIGHT)
-        current_hp_width = int((self.hp / self.max_hp) * HP_BAR_MAX_WIDTH)
-        if current_hp_width < 0:
-            current_hp_width = 0
-        bar_left_edge = self.x - (HP_BAR_MAX_WIDTH // 2)
+            if Monster.hp_bg_image:
+                Monster.hp_bg_image.draw(bar_center_x_full, bar_y, HP_BAR_MAX_WIDTH, HP_BAR_HEIGHT)
 
-        current_bar_center_x = bar_left_edge + (current_hp_width // 2)
 
-        Monster.hp_bar_image.draw(current_bar_center_x, bar_y, current_hp_width, HP_BAR_HEIGHT)
+            current_hp_width = int((self.hp / self.max_hp) * HP_BAR_MAX_WIDTH)
+            if current_hp_width < 0: current_hp_width = 0
+
+            current_bar_center_x = bar_left_edge + (current_hp_width // 2)
+
+            if Monster.hp_bar_image and current_hp_width > 0:
+                Monster.hp_bar_image.draw(current_bar_center_x, bar_y, current_hp_width, HP_BAR_HEIGHT)
+
+
+        # draw_rectangle(*self.get_bb(),255,0,0)
+
         pass
     def get_bb(self):
 
         return self.x-30,self.y-40,self.x+30,self.y-5
         pass
     def handle_collision(self,group,other):
-        if self.state_machine.current == self.DIE: return
+        if self.state_machine.current in (self.HURT, self.ATTACK, self.DIE):
+            return
+
         if group == 'player:monster':
+            print("MONSTER: Collided with PLAYER, changing to ATTACK")
             self.state_machine.set_state(self.ATTACK, e=None)
+
         elif group == 'player_attack:monster':
-            damage = other.damage if hasattr(other, 'damage') else 20
+            print("MONSTER: Collided with PLAYER_ATTACK, changing to HURT")
+            damage = 0
+            if hasattr(other, 'damage'):
+                damage = other.damage
+            else:
+                damage = 20
+
             self.hp -= damage
+            print(f"MONSTER HP: {self.hp}")
+
             self.state_machine.set_state(self.HURT, e=None)
 
+        pass
     def drop_item(self):
         pass
+
+class Slime(Monster):
+    def __init__(self):
+        super().__init__()
+        self.name = 'Slime'
+        self.max_hp = 50
+        self.hp = 50
+
+        self.img_walk = load_image('res/monster1_walk.png')
+        self.img_attack = load_image('res/monster1_attack.png')
+        self.img_hurt = load_image('res/monster1_hurt.png')
+
+    def drop_item(self):
+        roll = random.random()
+        item_to_drop = None
+        if roll < 0.2:
+            item_to_drop = 'POTION1'
+        elif roll < 0.25:
+            item_to_drop = 'WEAPON_S'
+        elif roll < 0.5:
+            item_to_drop = 'WEAPON1' if random.random() < 0.5 else 'WEAPON2'
+
+        self._spawn_item(item_to_drop)
+
+    def _spawn_item(self, name):
+        if name:
+            print(f"Slime Dropping {name}")
+            new_item = Item(self.x, 190, name)
+            game_world.add_object(new_item, 1)
+            # 충돌 처리 추가
+            player = game_world.get_player()
+            game_world.add_collision_pair('player:item', player, new_item)
 
     def remove_self(self):
         pass
-class Monster1(Monster):
+
+class Snake(Monster):
     def __init__(self):
-        pass
+        super().__init__()
+        self.name='Snake'
+        self.max_hp=60
+        self.hp=60
+        self.hp_y_offset=40
+
+        self.img_walk = load_image('res/snake_walk.png')
+        self.img_attack=load_image('res/snake_attack.png')
+        self.img_hurt=load_image('res/snake_hurt.png')
+
     def drop_item(self):
-        pass
-    def creat_item(self):
         pass
