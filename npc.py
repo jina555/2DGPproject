@@ -22,7 +22,7 @@ class Friend: # 구출 대상
 
             if distance < 200:
                 game_world.remove_object(self)
-                hp_icon = HpIcon(710, 50, self.reward_value)
+                hp_icon = HpIcon(710, 45, self.reward_value)
                 game_world.add_object(hp_icon, 2)
 
         pass
