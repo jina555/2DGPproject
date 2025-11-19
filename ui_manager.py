@@ -26,6 +26,7 @@ class UIManager:
 
         self.image_hp_text = load_image('res2/hp_1.png')
         self.image_hp_bar = load_image('res2/hp_2.png')
+        self.image_hp_bg=load_image('res2/hp_3.png')
         self.hp_base_x = 50
         self.hp_base_y = 40
 
@@ -135,10 +136,11 @@ class UIManager:
 
     def draw_hp_bar(self):
         self.image_hp_text.draw(self.hp_base_x, self.hp_base_y, 40, 20)
-
-
-        bar_max_width = 500
+        bar_max_width = 500#바 전체 길이
         bar_height = 20
+        bar_start_x = self.hp_base_x + 30
+        bg_center_x = bar_start_x + (bar_max_width // 2)
+        self.image_hp_bg.draw(bg_center_x, self.hp_base_y, bar_max_width, bar_height)
 
         if self.player:
             safe_hp = max(0, self.player.hp)

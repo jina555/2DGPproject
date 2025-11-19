@@ -89,7 +89,6 @@ class BossRush(State):
         self.timer -= game_framework.frame_time
         self.boss.x = clamp(50, self.boss.x, 950)
         if self.timer <= 0:
-            # Boss1에 저장된 'idle_state' 객체로 전환
             self.boss.state_machine.set_state(self.boss.idle_state, e=None)
 
     def draw(self):
@@ -154,7 +153,10 @@ class Boss(Monster):
         screen_center_x = 500  # 화면 가로 중앙 (1000 / 2)
         bar_y = 680  # 화면 상단 (725에서 조금 아래)
         max_width = 800  # 체력바 전체 길이
-        bar_height = 20  # 체력바 두께
+        bar_height = 20 # 체력바 두께
+        if Monster.hp_bg_image:
+            Monster.hp_bg_image.draw(screen_center_x, bar_y, max_width, bar_height)
+
         hp_ratio = max(0, self.hp) / self.max_hp
         current_width = int(max_width * hp_ratio)
         left_edge = screen_center_x - (max_width // 2)
@@ -211,7 +213,6 @@ class Boss1(Boss):
     def decide_action(self):
         roll = random.random()
         if roll < 0.4:
-            # 객체 변수(self.rush_state)를 사용해서 상태 전환
             self.state_machine.set_state(self.rush_state, e=None)
         elif roll < 0.7:
             self.state_machine.set_state(self.smash_state, e=None)

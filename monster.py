@@ -128,6 +128,7 @@ class Die(State):
 
 class Monster:
     hp_bar_image=None
+    hp_bg_image=None
     def __init__(self):
         self.x=random.randint(300,1000)
         self.face_dir=random.choice([-1,1])
@@ -146,6 +147,8 @@ class Monster:
 
         if Monster.hp_bar_image is None:
             Monster.hp_bar_image=load_image('res/hp_bar.png')
+        if Monster.hp_bg_image is None:
+            Monster.hp_bg_image=load_image('res2/hp_3.png')
 
         self.WALK=Walk(self)
         self.ATTACK=Attack(self)
@@ -165,6 +168,11 @@ class Monster:
         if self.state_machine.current != self.DIE:
             _, _, _, top = self.get_bb()
             bar_y = top + HP_BAR_Y_OFFSET
+            bar_left_edge = self.x - (HP_BAR_MAX_WIDTH // 2)
+            bar_center_x_full = bar_left_edge + (HP_BAR_MAX_WIDTH // 2)
+
+            if Monster.hp_bg_image:
+                Monster.hp_bg_image.draw(bar_center_x_full, bar_y, HP_BAR_MAX_WIDTH, HP_BAR_HEIGHT)
             current_hp_width = int((self.hp / self.max_hp) * HP_BAR_MAX_WIDTH)
             if current_hp_width < 0:
                 current_hp_width = 0
