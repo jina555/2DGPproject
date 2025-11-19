@@ -2,7 +2,7 @@ from pico2d import *
 from character import Character
 from map import Map
 from grass import Grass
-from monster import Monster
+from monster import Monster,Slime,Snake
 import game_framework
 import game_world
 from ui_manager import UIManager
@@ -12,9 +12,10 @@ from boss import Boss1
 STAGE={
     1:{
         'type':'normal',
+        'monster_class':Slime,
         'map':'res/map1.png',
         'grass':'res/grass.png',
-        'portal':(950,185),
+        'portal':(950,230),
         'next_stage':2
     },
     2:{
@@ -22,8 +23,16 @@ STAGE={
         'boss_class':Boss1,
         'map':'res2/bg2.png',
         'grass':'res/grass.png',
-        'portal':(950,185),
+        'portal':(950,230),
         'next_stage':3
+    },
+    3:{
+        'type':'normal',
+        'monster_class':Snake,
+        'map':'res2/bg_3_1.png',
+        'grass':'res/grass2.png',
+        'portal':(950,230),
+        'next_stage':4
     }
 
 
@@ -103,7 +112,8 @@ def load_stage(stage_index):
         portal = None
 
     if info['type'] == 'normal':
-        monsters = [Monster() for _ in range(5)]
+        MonsterClass = info.get('monster_class', Slime)
+        monsters = [MonsterClass() for _ in range(5)]
         game_world.add_objects(monsters, 1)
 
     elif info['type'] == 'boss':
@@ -192,7 +202,8 @@ def update():
 
             if respawn_timer <= 0:
                 print("Respawning monster...")
-                new_monster = Monster()
+                MonsterClass=current_info.get('monster_class',Slime)
+                new_monster = MonsterClass()
                 game_world.add_object(new_monster, 1)
 
                 game_world.add_collision_pair('player:monster', player, new_monster)
