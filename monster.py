@@ -24,13 +24,11 @@ HP_BAR_MAX_WIDTH = 50
 HP_BAR_HEIGHT = 5
 HP_BAR_Y_OFFSET = 5
 
-class Walk(State):
+class SlimeWalk(State):
     def __init__(self,p):
         self.p=p
-        pass
     def enter(self,e):
         self.p.vx= MOVE_SPEED * self.p.face_dir
-        pass
     def exit(self,e):
         pass
     def do(self):
@@ -52,10 +50,9 @@ class Walk(State):
 
         pass
     pass
-class Attack(State):
+class SlimeAttack(State):
     def __init__(self,p):
         self.p=p
-        pass
     def enter(self,e):
         print("monster:attack")
         self.p.vx=0
@@ -70,7 +67,6 @@ class Attack(State):
         self.p.attack_timer -=game_framework.frame_time
         if self.p.attack_timer <0:
             self.p.state_machine.set_state(self.p.WALK, e=None)
-
         pass
     def draw(self):
         frame_to_draw=min(int(self.p.frame), ATTACK_FRAMES_PER_ACTION-1)
@@ -80,10 +76,9 @@ class Attack(State):
             self.p.img_attack.clip_draw(frame_to_draw*W,0,W,H,self.p.x,self.p.y,W*3,H*3)
         pass
     pass
-class Hurt(State):
+class SlimeHurt(State):
     def __init__(self,p):
         self.p=p
-        pass
     def enter(self,e):
         print('monster:hurt')
         self.p.vx=0
@@ -140,107 +135,58 @@ class Monster:
         self.max_hp=100
         self.hp=100
 
-
-        self.img_walk=load_image('res/monster1_walk.png')
-        self.img_attack=load_image('res/monster1_attack.png')
-        self.img_hurt=load_image('res/monster1_hurt.png')
-
         if Monster.hp_bar_image is None:
             Monster.hp_bar_image=load_image('res/hp_bar.png')
         if Monster.hp_bg_image is None:
             Monster.hp_bg_image=load_image('res2/hp_3.png')
-
-        self.WALK=Walk(self)
-        self.ATTACK=Attack(self)
-        self.HURT=Hurt(self)
-        self.DIE=Die(self)
-
-
-        self.state_machine=StateMachine(start_state=self.WALK,transitions={})
-
         pass
 
     def update(self):
         self.state_machine.update()
-        pass
     def draw(self):
         self.state_machine.draw()
         if self.state_machine.current != self.DIE:
-            _, _, _, top = self.get_bb()
-            bar_y = top + HP_BAR_Y_OFFSET
-            bar_left_edge = self.x - (HP_BAR_MAX_WIDTH // 2)
-            bar_center_x_full = bar_left_edge + (HP_BAR_MAX_WIDTH // 2)
+            self.draw_hp_bar()
 
-            if Monster.hp_bg_image:
-                Monster.hp_bg_image.draw(bar_center_x_full, bar_y, HP_BAR_MAX_WIDTH, HP_BAR_HEIGHT)
-            current_hp_width = int((self.hp / self.max_hp) * HP_BAR_MAX_WIDTH)
-            if current_hp_width < 0:
-                current_hp_width = 0
-            bar_left_edge = self.x - (HP_BAR_MAX_WIDTH // 2)
+    def draw_hp_bar(self):
+        _, _, _, top = self.get_bb()
+        bar_y = top + HP_BAR_Y_OFFSET
+        bar_left_edge = self.x - (HP_BAR_MAX_WIDTH // 2)
+        bar_center_x_full = bar_left_edge + (HP_BAR_MAX_WIDTH // 2)
 
-            current_bar_center_x = bar_left_edge + (current_hp_width // 2)
+        if Monster.hp_bg_image:
+            Monster.hp_bg_image.draw(bar_center_x_full, bar_y, HP_BAR_MAX_WIDTH, HP_BAR_HEIGHT)
+        current_hp_width = int((self.hp / self.max_hp) * HP_BAR_MAX_WIDTH)
+        if current_hp_width < 0:
+            current_hp_width = 0
+        bar_left_edge = self.x - (HP_BAR_MAX_WIDTH // 2)
 
-            Monster.hp_bar_image.draw(current_bar_center_x, bar_y, current_hp_width, HP_BAR_HEIGHT)
+        current_bar_center_x = bar_left_edge + (current_hp_width // 2)
 
-        # draw_rectangle(*self.get_bb(),255,0,0)
-
-
-
+        Monster.hp_bar_image.draw(current_bar_center_x, bar_y, current_hp_width, HP_BAR_HEIGHT)
         pass
     def get_bb(self):
 
         return self.x-30,self.y-40,self.x+30,self.y-5
         pass
     def handle_collision(self,group,other):
-        if self.state_machine.current in (self.HURT, self.ATTACK, self.DIE):
-            return
-
+        if self.state_machine.current == self.DIE: return
         if group == 'player:monster':
-            print("MONSTER: Collided with PLAYER, changing to ATTACK")
             self.state_machine.set_state(self.ATTACK, e=None)
-
         elif group == 'player_attack:monster':
-            print("MONSTER: Collided with PLAYER_ATTACK, changing to HURT")
-            damage = 0
-            if hasattr(other, 'damage'):
-                damage = other.damage
-            else:
-                damage = 20
-
+            damage = other.damage if hasattr(other, 'damage') else 20
             self.hp -= damage
-            print(f"MONSTER HP: {self.hp}")
-
-            # (수정) HP와 상관없이 HURT로 가고, HURT.do()가 DIE를 결정
             self.state_machine.set_state(self.HURT, e=None)
 
-        pass
     def drop_item(self):
-        roll=random.random()
-        item_to_drop=None
-
-        if roll < 0.2:
-            item_to_drop='POTION1'
-        elif roll < 0.25:
-            item_to_drop='WEAPON_S'
-        elif roll < 0.5:
-            if random.random() < 0.25:
-                item_to_drop='WEAPON1'
-            else:
-                item_to_drop='WEAPON2'
-
-        if item_to_drop:
-            print(f"Dropping {item_to_drop}")
-            new_item = Item(self.x, 190, item_to_drop)
-            game_world.add_object(new_item, 1)
-
-            player = game_world.get_player()
-            if player:
-                game_world.add_collision_pair('player:item', player, new_item)
-            else:
-                game_world.add_collision_pair('player:item', None, new_item)
-
-
-
+        pass
 
     def remove_self(self):
+        pass
+class Monster1(Monster):
+    def __init__(self):
+        pass
+    def drop_item(self):
+        pass
+    def creat_item(self):
         pass
