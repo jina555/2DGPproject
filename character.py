@@ -274,8 +274,7 @@ class Attack:
     def enter(self,e):
         self.p.frame=0
         self.p.attack_time=ATTACK_TIME_PER_ACTION
-        self.update_attack_box()
-        self.last_frame=-1
+        self.attacked=False
 
     def exit(self,e):
         pass
@@ -283,41 +282,43 @@ class Attack:
     def do(self):
         self.p.frame=(self.p.frame + ATTACK_FRAMES_PER_ACTION * ATTACK_ACTION_PER_TIME * game_framework.frame_time)%ATTACK_FRAMES_PER_ACTION
         self.p.attack_time -= game_framework.frame_time
+        if self.p.frame >= 2.0 and not self.attacked:
+            # 1) 이펙트 생성
+            self.spawn_effect()
 
-        current_frame = int(self.p.frame)
-        if current_frame != self.last_frame:
+            # 2) 공격 판정(Hitbox) 생성 (칼 휘두르는 타이밍에 맞춤)
+            self.p.start_attack()
 
-            if current_frame == 2:
+            # 3) "나 공격 했음!" 표시 (중복 실행 방지)
+            self.attacked = True
 
-                effect_type_to_spawn = 'normal'
-                if self.p.equipped_weapon == 'WEAPON_S':
-                    effect_type_to_spawn = 'special_s'
-                elif self.p.equipped_weapon is None:
-                    effect_type_to_spawn = 'bare_hand'
-
-                offset_list = self.p.weapon_offset.get('attack', self.p.weapon_offset['idle'])
-                frame_index = clamp(0, current_frame, len(offset_list) - 1)
-                base_offset_x, offset_y = offset_list[frame_index]
-                offset_x = base_offset_x * self.p.face_dir
-
-                effect_x = self.p.x + offset_x
-                effect_y = self.p.y + offset_y
-
-                effect = SwordEffect(effect_x, effect_y, self.p.face_dir, effect_type_to_spawn)
-                game_world.add_object(effect, 2)
-
-            self.last_frame = current_frame  # 현재 프레임을 기억
-        if self.p.attack_time<0:
+            # 3. 공격 종료 체크
+        if self.p.attack_time < 0:
             if self.p.a_down != self.p.d_down:
-                self.p.state_machine.set_state(self.p.WALK,e=None)
+                self.p.state_machine.set_state(self.p.WALK, e=None)
             else:
-                self.p.state_machine.set_state(self.p.IDLE,e=None)
+                self.p.state_machine.set_state(self.p.IDLE, e=None)
             return
-        else:
-            self.update_attack_box()
-        pass
-    def update_attack_box(self):
-        pass
+
+    def spawn_effect(self):
+        # 이펙트 생성 코드 분리
+        effect_type_to_spawn = 'normal'
+        if self.p.equipped_weapon == 'WEAPON_S':
+            effect_type_to_spawn = 'special_s'
+        elif self.p.equipped_weapon is None:
+            effect_type_to_spawn = 'bare_hand'
+
+        offset_list = self.p.weapon_offset.get('attack', self.p.weapon_offset['idle'])
+        # 2번 프레임의 오프셋을 가져옵니다.
+        base_offset_x, offset_y = offset_list[2]
+        offset_x = base_offset_x * self.p.face_dir
+
+        effect_x = self.p.x + offset_x
+        effect_y = self.p.y + offset_y
+
+        effect = SwordEffect(effect_x, effect_y, self.p.face_dir, effect_type_to_spawn)
+        game_world.add_object(effect, 2)
+
     def draw(self):
         scale=3
         offset_y=145*(scale-1)//2
@@ -455,8 +456,8 @@ class Character:
             elif event.key==SDLK_w:
                 self.w_down=False
 
-        elif event.type==SDL_MOUSEBUTTONDOWN and event.button==SDL_BUTTON_LEFT:
-            self.start_attack()
+        # elif event.type==SDL_MOUSEBUTTONDOWN and event.button==SDL_BUTTON_LEFT:
+        #     self.start_attack()
 
         if event.type in (SDL_KEYDOWN, SDL_KEYUP,SDL_MOUSEBUTTONDOWN,SDL_MOUSEBUTTONUP):
             self.last_input_time=get_time()
@@ -551,6 +552,9 @@ class Character:
             self.inventory[inventory_index]=old_equipped_weapon
         else:
             self.inventory.pop(inventory_index)
+    def increase_max_hp(self,amount):
+        self.max_hp += amount
+        self.hp+=amount
 
     def update(self):
         self.colliding_item_list=[]
