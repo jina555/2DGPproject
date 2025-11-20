@@ -12,7 +12,11 @@ class SwordEffect:
             SwordEffect.image={
                 'bare_hand':load_image('effect/01.png'),
                 'normal':load_image('effect/03.png'),
-                'special_s':load_image('effect/04.png')
+                'special_s':load_image('effect/04.png'),
+                'weapon_3_effect': load_image('effect/05.png'),  # WEAPON3용
+                'weapon_4_effect': load_image('effect/06.png'),  # WEAPON4용 (세로 섬광)
+                'weapon_s_2_effect': load_image('effect/07.png')  # WEAPON_S_2용 (가로 섬광)
+
             }
 
         self.x, self.y = x, y

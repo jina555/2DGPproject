@@ -301,15 +301,21 @@ class Attack:
             return
 
     def spawn_effect(self):
-        # 이펙트 생성 코드 분리
+
         effect_type_to_spawn = 'normal'
-        if self.p.equipped_weapon == 'WEAPON_S':
+        if self.p.equipped_weapon == 'WEAPON_S_2':
+            effect_type_to_spawn = 'weapon_s_2_effect'
+        elif self.p.equipped_weapon == 'WEAPON4':
+            effect_type_to_spawn = 'weapon_4_effect'
+        elif self.p.equipped_weapon == 'WEAPON3':
+            effect_type_to_spawn = 'weapon_3_effect'
+        elif self.p.equipped_weapon == 'WEAPON_S':
             effect_type_to_spawn = 'special_s'
         elif self.p.equipped_weapon is None:
             effect_type_to_spawn = 'bare_hand'
 
         offset_list = self.p.weapon_offset.get('attack', self.p.weapon_offset['idle'])
-        # 2번 프레임의 오프셋을 가져옵니다.
+
         base_offset_x, offset_y = offset_list[2]
         offset_x = base_offset_x * self.p.face_dir
 
