@@ -113,6 +113,20 @@ def _draw_weapon(p, state_name):
     else:
         weapon_image.composite_draw(weapon_degree, 'h', draw_x, draw_y, ITEM_DRAW_W, ITEM_DRAW_H)
 
+    if p.hand_overlay_image:
+        hand_img = p.hand_overlay_image
+
+        # 무기가 그려진 위치를 기준으로 손의 위치를 미세 조정
+        hand_draw_x = draw_x + (p.hand_offset[0] * p.face_dir)
+        hand_draw_y = draw_y + p.hand_offset[1]
+
+        if p.face_dir == 1:
+            hand_img.draw(hand_draw_x, hand_draw_y, p.hand_w, p.hand_h)
+        else:
+            # 왼쪽을 볼 때는 손 이미지도 좌우 반전합니다.
+            hand_img.composite_draw(0, 'h', hand_draw_x, hand_draw_y, p.hand_w, p.hand_h)
+
+
 class Idle(State):
     def __init__(self,p):
         self.p=p
@@ -403,6 +417,12 @@ class Character:
         self.inventory=[]
         self.max_inventory_slots=25
         self.equipped_weapon=None
+
+        self.hand_overlay_image = load_image('res/hand.png')
+
+        self.hand_w, self.hand_h = 120, 120
+
+        self.hand_offset = (-5, 33)
 
         self.IDLE=Idle(self)
         self.WALK=Walk(self)
