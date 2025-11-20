@@ -269,5 +269,29 @@ class Snake(Monster):
         self.img_attack=load_image('res/snake_attack.png')
         self.img_hurt=load_image('res/snake_hurt.png')
 
+    def get_bb(self):
+        return self.x-45,self.y-45,self.x+45,self.y+20
+
     def drop_item(self):
+        roll = random.random()
+        item_to_drop = None
+        if roll < 0.2:
+            item_to_drop = 'POTION2'
+        elif roll < 0.25:
+            item_to_drop = 'WEAPON_S_2'
+        elif roll < 0.5:
+            item_to_drop = 'WEAPON3' if random.random() < 0.5 else 'WEAPON4'
+
+        self._spawn_item(item_to_drop)
+
+    def _spawn_item(self, name):
+        if name:
+            print(f"Snake Dropping {name}")
+            new_item = Item(self.x, 190, name)
+            game_world.add_object(new_item, 1)
+            # 충돌 처리 추가
+            player = game_world.get_player()
+            game_world.add_collision_pair('player:item', player, new_item)
+
+    def remove_self(self):
         pass

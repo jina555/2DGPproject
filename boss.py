@@ -170,6 +170,7 @@ class Boss(Monster):
             self.state_machine.draw()
         else:
             self.draw_body()
+        # draw_rectangle(*self.get_bb(), 255, 0, 0)
     def draw_body(self):
         if not self.images: return
         img_index = int(self.frame) % len(self.images)
@@ -198,8 +199,8 @@ class Boss(Monster):
     def get_bb(self):
 
         half_w = self.width // 2 - 20
-        half_h = self.height // 2 - 20
-        return self.x - half_w, self.y - half_h, self.x + half_w, self.y + half_h
+
+        return self.x - half_w, self.y - 95, self.x + half_w, self.y + 65
 
     def handle_collision(self, group, other):
         if group == 'player_attack:monster':
@@ -259,3 +260,10 @@ class Boss1(Boss):
                     self.state_machine.set_state(self.rush_state,e=None)
 
 
+class Boss2(Boss):
+    def __init__(self):
+        pass
+    def decide_action(self):
+        pass
+    def handle_collision(self, group, other):
+        pass
