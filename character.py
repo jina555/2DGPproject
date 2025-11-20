@@ -358,8 +358,8 @@ class Character:
 
         self.invincible_timer=0.0
 
-        self.max_hp=500
-        self.hp=500
+        self.max_hp=300
+        self.hp=300
 
         self.img_idle=load_image('res/idle.png')
         self.img_move=load_image('res/character_MOVE.png')
@@ -370,7 +370,11 @@ class Character:
         self.item_images = {
             'WEAPON1': load_image('item/무기1.png'),
             'WEAPON2': load_image('item/무기2.png'),
-            'WEAPON_S': load_image('item/무기s.png')
+            'WEAPON_S': load_image('item/무기s.png'),
+
+            'WEAPON3': load_image('item/weapon3.png'),
+            'WEAPON4': load_image('item/weapon4.png'),
+            'WEAPON_S_2': load_image('item/weapons_2.png'),
         }
 
         self.weapon_offset = {
@@ -536,12 +540,14 @@ class Character:
 
         item_type=self.inventory[inventory_index]
 
-        if item_type == 'POTION1':
-            print("Used Potion! HP restored.")
-            self.hp += 10#회복량
+        if item_type in ['POTION1', 'POTION2']:
+            heal_amount = 0
+            if item_type == 'POTION1':
+                heal_amount = 30  # 포션1 회복량
+            elif item_type == 'POTION2':
+                heal_amount = 50  # 포션2 회복량
             if self.hp > self.max_hp:
                 self.hp = self.max_hp
-
             self.inventory.pop(inventory_index)
             return
         item_to_equip = self.inventory[inventory_index]

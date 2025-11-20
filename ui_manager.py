@@ -35,6 +35,10 @@ class UIManager:
             'WEAPON2': load_image('item/무기2.png'),
             'WEAPON_S': load_image('item/무기s.png'),
             'POTION1': load_image('item/potion1.png'),
+            'WEAPON3': load_image('item/weapon3.png'),
+            'WEAPON4': load_image('item/weapon4.png'),
+            'WEAPON_S_2': load_image('item/weapons_2.png'),
+            'POTION2': load_image('item/potion2.png'),
         }
 
         self.bag_icon_scale=BAG_SCALE_NORMAL
@@ -136,7 +140,10 @@ class UIManager:
 
     def draw_hp_bar(self):
         self.image_hp_text.draw(self.hp_base_x, self.hp_base_y, 40, 20)
-        bar_max_width = 500#바 전체 길이
+        if self.player:
+            bar_max_width=self.player.max_hp
+        else:
+            bar_max_width=300#기본값
         bar_height = 20
         bar_start_x = self.hp_base_x + 30
         bg_center_x = bar_start_x + (bar_max_width // 2)
@@ -153,8 +160,6 @@ class UIManager:
 
             if current_bar_width > 0:
                 self.image_hp_bar.draw(bar_center_x, self.hp_base_y, current_bar_width, bar_height)
-
-
 
     def draw_inventory_items(self):
 
