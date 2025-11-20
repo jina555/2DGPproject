@@ -140,8 +140,8 @@ class Boss1Smash(State):
         total_frames = len(self.boss.images)
         self.boss.frame = (self.boss.frame + total_frames * BOSS_SMASH_ACTION_PER_TIME * dt)
 
-        if self.boss.y <= 250:  # 땅에 착지
-            self.boss.y = 250
+        if self.boss.y <= 275:  # 땅에 착지
+            self.boss.y = 275
             self.boss.vy = 0
             print("BOSS: BOOM!")
             self.boss.state_machine.set_state(self.boss.idle_state, e=None)
@@ -152,7 +152,7 @@ class Boss1Smash(State):
 class Boss(Monster):
     def __init__(self):
         super().__init__()
-        self.x,self.y=800,250
+        self.x,self.y=800,275
         self.images=[]
         self.animation_speed=8
         self.width,self.height=200,200
@@ -200,7 +200,7 @@ class Boss(Monster):
 
         half_w = self.width // 2 - 20
 
-        return self.x - half_w, self.y - 95, self.x + half_w, self.y + 65
+        return self.x - half_w, self.y - 105, self.x + half_w, self.y + 55
 
     def handle_collision(self, group, other):
         if group == 'player_attack:monster':
@@ -260,9 +260,79 @@ class Boss1(Boss):
                     self.state_machine.set_state(self.rush_state,e=None)
 
 
+class Boss2Appear:
+    def __init__(self, boss):
+        self.boss = boss
+        self.move_speed = 100.0  # 등장 속도
+
+    def enter(self, e):
+        print("BOSS2: Appear from right...")
+        self.boss.frame = 0
+        # 화면 오른쪽 밖에서 시작하도록 설정 (이미 init에서 했지만 확실하게)
+        self.boss.x = 1200
+        self.boss.vx = -self.move_speed  # 왼쪽으로 이동
+
+    def do(self):
+        dt = game_framework.frame_time
+        self.boss.x += self.boss.vx * dt
+
+        total_frames = len(self.boss.images)
+        self.boss.frame = (self.boss.frame + total_frames * BOSS_WALK_ACTION_PER_TIME * dt)
+
+        if self.boss.x <= 900:
+            self.boss.x = 900
+            self.boss.vx = 0
+            print("BOSS2: Arrival Complete. Idle Mode.")
+            self.boss.state_machine.set_state(self.boss.idle_state, e=None)
+
+    def draw(self):
+        self.boss.draw_body()
+    pass
+
+
+class Boss2Idle:
+    def __init__(self, boss):
+        self.boss = boss
+
+    def enter(self, e):
+        self.boss.vx = 0
+
+    def do(self):
+        dt = game_framework.frame_time
+
+        total_frames = len(self.boss.images)
+        self.boss.frame = (self.boss.frame + total_frames * BOSS_IDLE_ACTION_PER_TIME * dt)
+
+    def draw(self):
+        self.boss.draw_body()
+    pass
+
+
 class Boss2(Boss):
     def __init__(self):
+        super().__init__()
+        self.name='cobra'
+
+        self.images = [
+            load_image('boss2/cobra1.png'),
+            load_image('boss2/cobra2.png'),
+            load_image('boss2/cobra3.png'),
+        ]
+        self.width = 400
+        self.height = 400
+        self.x = 1200
+        self.y = 380
+        self.max_hp = 200 #보스2 체력 수정 예정
+        self.hp = 200
+        self.face_dir = -1
+
+        self.appear_state = Boss2Appear(self)
+        self.idle_state = Boss2Idle(self)
+
+        self.state_machine = StateMachine(start_state=self.appear_state, transitions={})
         pass
+    def get_bb(self):
+        return self.x-160,self.y-200,self.x+140,self.y+120
     def decide_action(self):
         pass
     def handle_collision(self, group, other):
