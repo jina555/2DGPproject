@@ -7,7 +7,7 @@ import game_framework
 import game_world
 from ui_manager import UIManager
 from portal import Portal
-from boss import Boss1
+from boss import Boss1,Boss2
 from npc import Friend,HpIcon
 
 STAGE={
@@ -37,6 +37,14 @@ STAGE={
         'grass':'res/grass2.png',
         'portal':(950,230),
         'next_stage':4
+    },
+    4:{
+        'type':'boss',
+        'boss_class':Boss2,
+        'map':'res2/bg_3_02.png',
+        'grass':'res/grass2.png',
+        'portal':(950,230),
+        'next_stage':5
     }
 
 
@@ -71,6 +79,7 @@ def init():
 
     game_world.add_collision_pair('player:monster',player,None)
     game_world.add_collision_pair('player_attack:monster',None,None)
+    game_world.add_collision_pair('monster_attack:player',None,player)
 
     load_stage(1)
 
@@ -128,6 +137,7 @@ def load_stage(stage_index):
 
     game_world.add_collision_pair('player:monster', player, None)
     game_world.add_collision_pair('player_attack:monster', None, None)
+    game_world.add_collision_pair('monster_attack:player',None,player)
 
     game_world.add_collision_pair('player:item', player, None)
 

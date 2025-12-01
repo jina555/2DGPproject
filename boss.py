@@ -4,6 +4,7 @@ from state_machine import StateMachine,State
 import game_framework
 import game_world
 import random
+from fireball import Fireball
 
 PIXEL_PER_METER = (64.0 / 1.75)
 
@@ -268,7 +269,6 @@ class Boss2Appear:
     def enter(self, e):
         print("BOSS2: Appear from right...")
         self.boss.frame = 0
-        # 화면 오른쪽 밖에서 시작하도록 설정 (이미 init에서 했지만 확실하게)
         self.boss.x = 1200
         self.boss.vx = -self.move_speed  # 왼쪽으로 이동
 
@@ -293,20 +293,62 @@ class Boss2Appear:
 class Boss2Idle:
     def __init__(self, boss):
         self.boss = boss
+        self.timer=0
 
     def enter(self, e):
         self.boss.vx = 0
+        self.timer=2.0
+
 
     def do(self):
         dt = game_framework.frame_time
+        self.timer -= dt
 
         total_frames = len(self.boss.images)
         self.boss.frame = (self.boss.frame + total_frames * BOSS_IDLE_ACTION_PER_TIME * dt)
+
+        if self.timer <= 0:
+            self.boss.decide_action()
 
     def draw(self):
         self.boss.draw_body()
     pass
 
+class Boss2Attack:
+    def __init__(self,boss):
+        self.boss=boss
+        self.timer=0
+        self.fired=False
+        pass
+    def enter(self, e):
+        self.timer=1.0
+        self.fired=False
+        pass
+    def do(self):
+        dt=game_framework.frame_time
+        self.timer-=dt
+
+        if self.timer <= 0.5 and not self.fired:
+            self.fire()
+            self.fired=True
+        total_frames = len(self.boss.images)
+        self.boss.frame=(self.boss.frame + total_frames * dt)
+
+        if self.timer <= 0:
+            self.boss.state_machine.set_state(self.boss.idle_state, e=None)
+        pass
+    def fire(self):
+        fire_x=self.boss.x +(100 * self.boss.face_dir)
+        fire_y=self.boss.y-100
+
+        fireball=Fireball(fire_x, fire_y,self.boss.face_dir)
+        game_world.add_object(fireball,1)
+
+        game_world.add_collision_pair('monster_attack:player',fireball,None)
+        pass
+    def draw(self):
+        self.boss.draw_body()
+        pass
 
 class Boss2(Boss):
     def __init__(self):
@@ -328,12 +370,21 @@ class Boss2(Boss):
 
         self.appear_state = Boss2Appear(self)
         self.idle_state = Boss2Idle(self)
+        self.attack_state=Boss2Attack(self)
 
         self.state_machine = StateMachine(start_state=self.appear_state, transitions={})
         pass
     def get_bb(self):
         return self.x-160,self.y-200,self.x+140,self.y+120
     def decide_action(self):
+        roll=random.random()
+
+        if roll < 0.7:
+            self.state_machine.set_state(self.attack_state, e=None)
+        else:
+            self.state_machine.set_state(self.idle_state, e=None)
+
         pass
     def handle_collision(self, group, other):
+        super().handle_collision(group,other)
         pass
