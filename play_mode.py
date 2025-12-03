@@ -27,7 +27,8 @@ STAGE={
         'portal':(950,230),
         'next_stage':3,
         'friend_image':'res2/f1.png',
-        'reward_hp':200
+        'reward_hp':200,
+        'friend_pos':(750,260)
 
     },
     3:{
@@ -44,7 +45,9 @@ STAGE={
         'map':'res2/bg_3_02.png',
         'grass':'res/grass2.png',
         'portal':(950,230),
-        'next_stage':5
+        'next_stage':5,
+        'friend_image':'res2/f2.png',
+        'friend_pos':(750,200)
     }
 
 
@@ -206,7 +209,9 @@ def update():
             game_world.add_object(portal, 1)
             f_img=current_info.get('friend_image','res2/f1.png')
             r_val=current_info.get('reward_value',200)
-            friend = Friend(750, 260, f_img,r_val)
+            fx,fy=current_info.get('friend_pos',(750,260))
+
+            friend = Friend(fx, fy, f_img,r_val)
             game_world.add_object(friend, 1)
 
     if portal and collide(player, portal) and player.w_down:
