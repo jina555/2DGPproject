@@ -1,7 +1,7 @@
 from pico2d import *
 import game_world
 import game_framework
-from sdl2 import SDL_KEYDOWN,SDLK_f,SDLK_r
+from sdl2 import SDL_KEYDOWN,SDLK_f,SDLK_r,SDLK_t
 
 class Friend: # 구출 대상
     def __init__(self,x,y,image_name,reward_value):
@@ -21,10 +21,22 @@ class Friend: # 구출 대상
             distance=((self.x-player.x)**2+(self.y-player.y)**2)**0.5
 
             if distance < 200:
+                if self.reward_value <= 100:
+                    pass
+                else:
+                    hp_icon = HpIcon(710, 45, self.reward_value)
+                    game_world.add_object(hp_icon, 2)
                 game_world.remove_object(self)
-                hp_icon = HpIcon(710, 45, self.reward_value)
-                game_world.add_object(hp_icon, 2)
 
+        pass
+class InvincibleIcon:
+    def __init__(self,x,y):
+        pass
+    def update(self):
+        pass
+    def draw(self):
+        pass
+    def handle_event(self,event):
         pass
 
 class HpIcon:
