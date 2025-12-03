@@ -27,7 +27,7 @@ STAGE={
         'portal':(950,230),
         'next_stage':3,
         'friend_image':'res2/f1.png',
-        'reward_hp':200,
+        'reward_value':200,
         'friend_pos':(750,260)
 
     },
@@ -47,6 +47,7 @@ STAGE={
         'portal':(950,230),
         'next_stage':5,
         'friend_image':'res2/f2.png',
+        'reward_value':50,
         'friend_pos':(750,200)
     }
 

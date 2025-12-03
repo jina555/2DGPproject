@@ -22,6 +22,8 @@ class Friend: # 구출 대상
 
             if distance < 200:
                 if self.reward_value <= 100:
+                    inv_icon=InvincibleIcon(790,45)
+                    game_world.add_object(inv_icon,2)
                     pass
                 else:
                     hp_icon = HpIcon(710, 45, self.reward_value)
@@ -31,12 +33,24 @@ class Friend: # 구출 대상
         pass
 class InvincibleIcon:
     def __init__(self,x,y):
+        self.image=load_image('res2/invincible.png')
+        self.x,self.y=x,y
+        self.width,self.height=50,50
         pass
     def update(self):
         pass
     def draw(self):
+        scale=3
+        self.image.draw(self.x,self.y,self.image.w *scale,self.image.h*scale)
         pass
     def handle_event(self,event):
+        if event.type==SDL_KEYDOWN and event.key==SDLK_t:
+            player=game_world.get_player()
+            if player:
+                player.invincible=True
+                player.invincible_timer=5.0
+                player.scale=2.0
+            game_world.remove_object(self)
         pass
 
 class HpIcon:
