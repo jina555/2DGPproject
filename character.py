@@ -375,8 +375,9 @@ class Character:
         self.face_dir=1 #1:오른쪽, -1:왼쪽
         self.last_imput_time=get_time()
         self.frame=0.0
-
+        self.invincible=False
         self.invincible_timer=0.0
+        self.scale=1.0
 
         self.max_hp=300
         self.hp=300
@@ -395,6 +396,10 @@ class Character:
             'WEAPON3': load_image('item/weapon3.png'),
             'WEAPON4': load_image('item/weapon4.png'),
             'WEAPON_S_2': load_image('item/weapons_2.png'),
+
+            'WEAPON5': load_image('item/무기_22.png'),
+            'WEAPON6': load_image('item/무기_23.png'),
+            'WEAPON_S_3': load_image('item/무기_24.png'),
         }
 
         self.weapon_offset = {
@@ -566,12 +571,15 @@ class Character:
 
         item_type=self.inventory[inventory_index]
 
-        if item_type in ['POTION1', 'POTION2']:
+        if item_type in ['POTION1', 'POTION2','POTION3']:
             heal_amount = 0
             if item_type == 'POTION1':
                 heal_amount = 30  # 포션1 회복량
             elif item_type == 'POTION2':
                 heal_amount = 50  # 포션2 회복량
+            else:
+                heal_amount=60
+            self.hp += heal_amount
             if self.hp > self.max_hp:
                 self.hp = self.max_hp
             self.inventory.pop(inventory_index)

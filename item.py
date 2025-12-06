@@ -9,6 +9,9 @@ WEAPON_DAMAGE = {
     'WEAPON3':80,
     'WEAPON4':90,
     'WEAPON_S_2':120,
+    'WEAPON5':100,
+    'WEAPON6':110,
+    'WEAPON_S_3':200
 }
 
 item_images=None
@@ -29,9 +32,13 @@ class Item:
                 'WEAPON3': load_image('item/weapon3.png'),
                 'WEAPON4': load_image('item/weapon4.png'),
                 'WEAPON_S_2': load_image('item/weapons_2.png'),
+                'WEAPON5': load_image('item/무기_22.png'),
+                'WEAPON6': load_image('item/무기_23.png'),
+                'WEAPON_S_3':load_image('item/무기_24.png'),
 
                 'POTION1': load_image('item/potion1.png'),
                 'POTION2': load_image('item/potion2.png'),
+                'POTION3': load_image('item/potion3.png'),
             }
     def update(self):
         pass

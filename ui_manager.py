@@ -39,6 +39,10 @@ class UIManager:
             'WEAPON4': load_image('item/weapon4.png'),
             'WEAPON_S_2': load_image('item/weapons_2.png'),
             'POTION2': load_image('item/potion2.png'),
+            'WEAPON5':load_image('item/무기_22.png'),
+            'WEAPON6':load_image('item/무기_23.png'),
+            'WEAPON_S_3':load_image('item/무기_24.png'),
+            'POTION3':load_image('item/potion3.png'),
         }
 
         self.bag_icon_scale=BAG_SCALE_NORMAL

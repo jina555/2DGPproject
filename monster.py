@@ -312,9 +312,26 @@ class Gollum(Monster):
         return self.x-45,self.y-45,self.x+45,self.y+45
 
     def drop_item(self):
+        roll = random.random()
+        item_to_drop = None
+        if roll < 0.2:
+            item_to_drop = 'POTION3'
+        elif roll < 0.25:
+            item_to_drop = 'WEAPON_S_3'
+        elif roll < 0.5:
+            item_to_drop = 'WEAPON5' if random.random() < 0.5 else 'WEAPON6'
+
+        self._spawn_item(item_to_drop)
         pass
 
     def _spawn_item(self, name):
+        if name:
+            print(f"Gollum Dropping {name}")
+            new_item = Item(self.x, 190, name)
+            game_world.add_object(new_item, 1)
+            # 충돌 처리 추가
+            player = game_world.get_player()
+            game_world.add_collision_pair('player:item', player, new_item)
         pass
     def remove_self(self):
         pass
