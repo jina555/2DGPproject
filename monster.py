@@ -190,7 +190,7 @@ class Monster:
                 Monster.hp_bar_image.draw(current_bar_center_x, bar_y, current_hp_width, HP_BAR_HEIGHT)
 
 
-        # draw_rectangle(*self.get_bb(),255,0,0)
+        draw_rectangle(*self.get_bb(),255,0,0)
 
         pass
     def get_bb(self):
@@ -263,7 +263,7 @@ class Snake(Monster):
         self.name='Snake'
         self.max_hp=60
         self.hp=60
-        self.hp_y_offset=40
+        self.hp_y_offset=20
 
         self.img_walk = load_image('res/snake_walk.png')
         self.img_attack=load_image('res/snake_attack.png')
@@ -293,5 +293,28 @@ class Snake(Monster):
             player = game_world.get_player()
             game_world.add_collision_pair('player:item', player, new_item)
 
+    def remove_self(self):
+        pass
+
+class Gollum(Monster):
+    def __init__(self):
+        super().__init__()
+        self.name='Gollum'
+        self.max_hp=70
+        self.hp=70
+        self.hp_y_offset=25
+
+        self.img_walk = load_image('res/mon3_walk.png')
+        self.img_attack=load_image('res/mon3_attack.png')
+        self.img_hurt=load_image('res/mon3_hurt.png')
+
+    def get_bb(self):
+        return self.x-45,self.y-45,self.x+45,self.y+45
+
+    def drop_item(self):
+        pass
+
+    def _spawn_item(self, name):
+        pass
     def remove_self(self):
         pass
