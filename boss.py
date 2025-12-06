@@ -388,3 +388,14 @@ class Boss2(Boss):
     def handle_collision(self, group, other):
         super().handle_collision(group,other)
         pass
+
+class Boss3(Boss):
+    def __init__(self):
+        super().__init__()
+        pass
+    def get_bb(self):
+        pass
+    def decide_action(self):
+        pass
+    def handle_collision(self, group, other):
+        pass
