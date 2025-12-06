@@ -2,7 +2,7 @@ from pico2d import *
 from character import Character
 from map import Map
 from grass import Grass
-from monster import Monster,Slime,Snake
+from monster import Monster,Slime,Snake,Gollum
 import game_framework
 import game_world
 from ui_manager import UIManager
@@ -49,6 +49,15 @@ STAGE={
         'friend_image':'res2/f2.png',
         'reward_value':50,
         'friend_pos':(750,200)
+    },
+    5:{
+        'type':'normal',
+        'monster_class':Gollum,
+        'map':'res2/bg_5_2.png',
+        'grass':'res2/bg_5_front.png',
+        'portal':(950,230),
+        'next_stage':6
+
     }
 
 
