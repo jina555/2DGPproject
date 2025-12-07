@@ -171,7 +171,7 @@ class Boss(Monster):
             self.state_machine.draw()
         else:
             self.draw_body()
-        # draw_rectangle(*self.get_bb(), 255, 0, 0)
+        draw_rectangle(*self.get_bb(), 255, 0, 0)
     def draw_body(self):
         if not self.images: return
         img_index = int(self.frame) % len(self.images)
@@ -392,10 +392,34 @@ class Boss2(Boss):
 class Boss3(Boss):
     def __init__(self):
         super().__init__()
+        self.name='queen'
+        self.images = [
+            load_image('boss3/queen.png'),
+            load_image('boss3/queen2.png'),
+            load_image('boss3/queen3.png'),
+        ]
+
+        self.max_hp = 100
+        self.hp = 100  # 보스 체력 나중에 수정
+        self.damage = 30  # 나중에 수정
+        self.width = 200
+        self.height = 200
+        self.sleep_state = BossSleep(self)
+        self.idle_state = BossIdle(self)
+        self.walk_state = BossWalk(self)
+        self.state_machine = StateMachine(start_state=self.sleep_state, transitions={})
         pass
     def get_bb(self):
+        return self.x - 70, self.y - 100, self.x + 90, self.y + 80
+
         pass
     def decide_action(self):
+        roll = random.random()
+        if roll < 0.4:
+            self.state_machine.set_state(self.walk_state, e=None)
+        else:
+            self.state_machine.set_state(self.idle_state, e=None)
         pass
     def handle_collision(self, group, other):
+        super().handle_collision(group, other)
         pass
