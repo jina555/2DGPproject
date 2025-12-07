@@ -9,10 +9,10 @@ from fireball import Fireball
 PIXEL_PER_METER = (64.0 / 1.75)
 
 WALK_SPEED_KMPH = 5.0
-WALK_SPEED_PPS = (WALK_SPEED_KMPH * 1000.0 / 60.0 / 60.0) * PIXEL_PER_METER
+WALK_SPEED_PPS = (WALK_SPEED_KMPH * 1000.0 / 60.0/60.0) * PIXEL_PER_METER
 
 RUSH_SPEED_KMPH = 40.0
-RUSH_SPEED_PPS = (RUSH_SPEED_KMPH * 1000.0 / 60.0 / 60.0) * PIXEL_PER_METER
+RUSH_SPEED_PPS = (RUSH_SPEED_KMPH * 1000.0 / 60.0/60.0) * PIXEL_PER_METER
 
 JUMP_SPEED_MPS = 15.0
 JUMP_SPEED = JUMP_SPEED_MPS * PIXEL_PER_METER
@@ -315,14 +315,24 @@ class Boss2Idle:
     pass
 
 class Boss2Attack:
-    def __init__(self,boss):
-        self.boss=boss
-        self.timer=0
-        self.fired=False
+    def __init__(self, boss, x_off=100, y_off=-100, w=100, h=100, damage=30):
+        self.boss = boss
+        self.x_off = x_off
+        self.y_off = y_off
+        self.w = w
+        self.h = h
+        self.damage = damage
+        self.timer = 0
+        self.fired = False
         pass
     def enter(self, e):
+        self.boss.vx=0
         self.timer=1.0
         self.fired=False
+
+        player = game_world.get_player()
+        if player:
+            self.boss.face_dir = 1 if player.x > self.boss.x else -1
         pass
     def do(self):
         dt=game_framework.frame_time
@@ -338,10 +348,10 @@ class Boss2Attack:
             self.boss.state_machine.set_state(self.boss.idle_state, e=None)
         pass
     def fire(self):
-        fire_x=self.boss.x +(100 * self.boss.face_dir)
-        fire_y=self.boss.y-100
+        fire_x = self.boss.x + (self.x_off * self.boss.face_dir)
+        fire_y = self.boss.y + self.y_off
 
-        fireball=Fireball(fire_x, fire_y,self.boss.face_dir)
+        fireball=Fireball(fire_x, fire_y,self.boss.face_dir,self.w,self.h,self.damage)
         game_world.add_object(fireball,1)
 
         game_world.add_collision_pair('monster_attack:player',fireball,None)
@@ -398,7 +408,7 @@ class Boss3(Boss):
             load_image('boss3/queen2.png'),
             load_image('boss3/queen3.png'),
         ]
-
+        self.y=270
         self.max_hp = 100
         self.hp = 100  # 보스 체력 나중에 수정
         self.damage = 30  # 나중에 수정
@@ -407,6 +417,8 @@ class Boss3(Boss):
         self.sleep_state = BossSleep(self)
         self.idle_state = BossIdle(self)
         self.walk_state = BossWalk(self)
+        self.rush_state=BossRush(self)
+        self.attack_state = Boss2Attack(self, x_off=80, y_off=-20, w=100, h=100, damage=20)
         self.state_machine = StateMachine(start_state=self.sleep_state, transitions={})
         pass
     def get_bb(self):
@@ -414,12 +426,21 @@ class Boss3(Boss):
 
         pass
     def decide_action(self):
+        hp_ratio = self.hp / self.max_hp
         roll = random.random()
-        if roll < 0.4:
-            self.state_machine.set_state(self.walk_state, e=None)
+        if hp_ratio>0.7:
+            if roll < 0.5:
+                self.state_machine.set_state(self.walk_state, e=None)
+            else:
+                self.state_machine.set_state(self.idle_state, e=None)
         else:
-            self.state_machine.set_state(self.idle_state, e=None)
-        pass
+            if roll < 0.4:
+                self.state_machine.set_state(self.attack_state, e=None)
+            elif roll < 0.6:
+                self.state_machine.set_state(self.rush_state,e=None)
+            else:
+                self.state_machine.set_state(self.walk_state,e=None)
+
     def handle_collision(self, group, other):
         super().handle_collision(group, other)
         pass
