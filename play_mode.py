@@ -7,7 +7,7 @@ import game_framework
 import game_world
 from ui_manager import UIManager
 from portal import Portal
-from boss import Boss1,Boss2
+from boss import Boss1,Boss2,Boss3
 from npc import Friend,HpIcon
 
 STAGE={
@@ -57,7 +57,12 @@ STAGE={
         'grass':'res2/bg_5_front.png',
         'portal':(950,230),
         'next_stage':6
-
+    },
+    6:{
+        'type':'boss',
+        'boss_class':Boss3,
+        'map':'res2/bg_6_2.png',
+        'grass':'res2/grass3.png',
     }
 
 

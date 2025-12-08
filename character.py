@@ -99,33 +99,30 @@ def _draw_weapon(p, state_name):
     weapon_image = p.item_images.get(p.equipped_weapon)
     if not weapon_image:
         return
+    current_total_scale=3*p.scale
+    base_visual_offset_y = 155 * (3 - 1) // 2
+    new_visual_offset_y = 155 * (current_total_scale - 1) // 2
 
     offset_list = p.weapon_offset.get(state_name, p.weapon_offset['idle'])
-
     frame_index = clamp(0, int(p.frame), len(offset_list) - 1)
-    base_offset_x, offset_y = offset_list[frame_index]
-    offset_x = base_offset_x * p.face_dir
+    base_offset_x, base_offset_y = offset_list[frame_index]
+    rel_y_from_center = base_offset_y - base_visual_offset_y
+    offset_x = (base_offset_x * p.scale) * p.face_dir
+    offset_y = new_visual_offset_y + (rel_y_from_center * p.scale)
+    if p.invincible:
+        offset_y -= 140
+
     draw_x = p.x + offset_x
     draw_y = p.y + offset_y
+
+    w = ITEM_DRAW_W * p.scale
+    h = ITEM_DRAW_H * p.scale
+
     weapon_degree=-170 * p.face_dir
     if p.face_dir == 1:
-        weapon_image.composite_draw(weapon_degree,'',draw_x, draw_y ,ITEM_DRAW_W, ITEM_DRAW_H)
+        weapon_image.composite_draw(weapon_degree,'',draw_x, draw_y ,w,h)
     else:
-        weapon_image.composite_draw(weapon_degree, 'h', draw_x, draw_y, ITEM_DRAW_W, ITEM_DRAW_H)
-
-    if p.hand_overlay_image:
-        hand_img = p.hand_overlay_image
-
-        # 무기가 그려진 위치를 기준으로 손의 위치를 미세 조정
-        hand_draw_x = draw_x + (p.hand_offset[0] * p.face_dir)
-        hand_draw_y = draw_y + p.hand_offset[1]
-
-        if p.face_dir == 1:
-            hand_img.draw(hand_draw_x, hand_draw_y, p.hand_w, p.hand_h)
-        else:
-            # 왼쪽을 볼 때는 손 이미지도 좌우 반전합니다.
-            hand_img.composite_draw(0, 'h', hand_draw_x, hand_draw_y, p.hand_w, p.hand_h)
-
+        weapon_image.composite_draw(weapon_degree, 'h', draw_x, draw_y, w,h)
 
 class Idle(State):
     def __init__(self,p):
@@ -142,8 +139,10 @@ class Idle(State):
             self.p.face_dir=1
         self.p.frame=(self.p.frame + IDLE_FRAMES_PER_ACTION * IDLE_ACTION_PER_TIME * game_framework.frame_time)%IDLE_FRAMES_PER_ACTION
     def draw(self):
-        scale=3
-        offset_y=145*(scale-1)//2
+        scale=3*self.p.scale
+        offset_y=155*(scale-1)//2
+        if self.p.invincible:
+            offset_y -= 140
         if self.p.face_dir==1:
             self.p.img_idle.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
         else:
@@ -180,8 +179,10 @@ class Walk(State):
         self.p.frame=(self.p.frame + WALK_FRAMES_PER_ACTION * WALK_ACTION_PER_TIME * game_framework.frame_time)%WALK_FRAMES_PER_ACTION
 
     def draw(self):
-        scale=3
-        offset_y=145*(scale-1)//2
+        scale=3*self.p.scale
+        offset_y=155*(scale-1)//2
+        if self.p.invincible:
+            offset_y -= 140
 
         if self.p.face_dir==1:
             self.p.img_move.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
@@ -219,8 +220,10 @@ class Run:
             self.p.state_machine.set_state(self.p.JUMP, e=None)
             return
     def draw(self):
-        scale=3
-        offset_y=145*(scale-1)//2
+        scale=3*self.p.scale
+        offset_y=155*(scale-1)//2
+        if self.p.invincible:
+            offset_y -= 140
 
         if self.p.face_dir==1:
             self.p.img_run.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
@@ -270,8 +273,10 @@ class Jump:
             return
         pass
     def draw(self):
-        scale=3
-        offset_y=145*(scale-1)//2
+        scale=3*self.p.scale
+        offset_y=155*(scale-1)//2
+        if self.p.invincible:
+            offset_y -= 140
 
         if self.p.face_dir==1:
             self.p.img_jump.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
@@ -340,8 +345,10 @@ class Attack:
         game_world.add_object(effect, 2)
 
     def draw(self):
-        scale=3
-        offset_y=145*(scale-1)//2
+        scale=3*self.p.scale
+        offset_y=155*(scale-1)//2
+        if self.p.invincible:
+            offset_y -= 140
 
         if self.p.face_dir==1:
             self.p.img_attack.clip_draw(int(self.p.frame)*32,0,32,64,self.p.x,self.p.y+offset_y,32*scale,64*scale)
@@ -602,8 +609,10 @@ class Character:
         dt= game_framework.frame_time
         if self.invincible_timer > 0:
             self.invincible_timer -= dt
-            if self.invincible_timer < 0:
+            if self.invincible_timer <= 0:
                 self.invincible_timer = 0
+                self.invincible=False
+                self.scale=1.0
                 print("Invincibility finished.")
 
         self.x += self.vx*dt
