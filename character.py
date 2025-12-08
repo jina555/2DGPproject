@@ -1,7 +1,7 @@
 from pico2d import *
 from sdl2 import SDL_KEYDOWN,SDL_KEYUP,SDLK_a,SDLK_d,SDLK_LSHIFT,SDLK_SPACE,SDLK_RSHIFT,SDL_BUTTON_LEFT,SDL_MOUSEBUTTONDOWN,SDLK_w
 from state_machine import StateMachine,State
-from item import Item, WEAPON_DAMAGE
+from item import Item, WEAPON_DAMAGE,get_item_images
 import game_framework
 import game_world
 import math
@@ -394,26 +394,13 @@ class Character:
         self.img_run=load_image('res/character_MOVE.png')
         self.img_jump=load_image('res/character_JUMP.png')
         self.img_attack=load_image('res/character_ATTACK.png')
-
-        self.item_images = {
-            'WEAPON1': load_image('item/무기1.png'),
-            'WEAPON2': load_image('item/무기2.png'),
-            'WEAPON_S': load_image('item/무기s.png'),
-
-            'WEAPON3': load_image('item/weapon3.png'),
-            'WEAPON4': load_image('item/weapon4.png'),
-            'WEAPON_S_2': load_image('item/weapons_2.png'),
-
-            'WEAPON5': load_image('item/무기_22.png'),
-            'WEAPON6': load_image('item/무기_23.png'),
-            'WEAPON_S_3': load_image('item/무기_24.png'),
-        }
+        self.item_images = get_item_images()
 
         self.weapon_offset = {
-            'idle': [(7, 85),(7,82),(7,85),(7,82)],
-            'walk': [(7, 85),(6,80),(7,85),(7,85)],
-            'run': [(7,85),(6,80),(7,85),(7,85)],
-            'jump': [(5,80),(0,90),(3,110),(2,100),(2,90),(5,80)],
+            'idle': [(10, 90),(10,88),(10,90),(10,88)],
+            'walk': [(10, 90),(10,85),(10,90),(10,85)],
+            'run': [(10,95),(10,90),(10,90),(10,95)],
+            'jump': [(5,90),(0,100),(3,120),(2,110),(2,100),(5,90)],
             'attack': [(5,85), (-20, 120), (45,90), (25,85)]
         }
 
