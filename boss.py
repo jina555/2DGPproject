@@ -130,6 +130,7 @@ class Boss1Smash(State):
 
     def enter(self, e):
         print("BOSS: SMASH!")
+        self.boss.look_at_player()
         self.boss.vy = JUMP_SPEED
         self.boss.vx = 0
         self.boss.on_ground = False
@@ -172,7 +173,7 @@ class Boss(Monster):
             self.state_machine.draw()
         else:
             self.draw_body()
-        draw_rectangle(*self.get_bb(), 255, 0, 0)
+        # draw_rectangle(*self.get_bb(), 255, 0, 0)
     def draw_body(self):
         if not self.images: return
         img_index = int(self.frame) % len(self.images)
@@ -222,6 +223,11 @@ class Boss(Monster):
                 if self.idle_state:
                     self.state_machine.set_state(self.idle_state, e=None)
 
+    def look_at_player(self):
+        player = game_world.get_player()
+        if player:
+            self.face_dir = 1 if player.x > self.x else -1
+
 
 class Boss1(Boss):
     def __init__(self):
@@ -232,8 +238,8 @@ class Boss1(Boss):
             load_image('boss1/bigslim_03.png'),
         ]
 
-        self.max_hp=100
-        self.hp=100 #보스 체력 나중에 수정
+        self.max_hp=1000
+        self.hp=1000 #보스 체력 나중에 수정
         self.damage=30#나중에 수정
         self.width=200
         self.height=200
@@ -331,9 +337,7 @@ class Boss2Attack:
         self.timer=1.0
         self.fired=False
 
-        player = game_world.get_player()
-        if player:
-            self.boss.face_dir = 1 if player.x > self.boss.x else -1
+        self.boss.look_at_player()
         pass
     def do(self):
         dt=game_framework.frame_time
@@ -375,13 +379,15 @@ class Boss2(Boss):
         self.height = 400
         self.x = 1200
         self.y = 380
-        self.max_hp = 200 #보스2 체력 수정 예정
-        self.hp = 200
+        self.max_hp = 3000 #보스2 체력 수정 예정
+        self.hp = 3000
+        self.damage=50
         self.face_dir = -1
 
         self.appear_state = Boss2Appear(self)
         self.idle_state = Boss2Idle(self)
         self.attack_state=Boss2Attack(self)
+        self.rush_state = BossRush(self)
 
         self.state_machine = StateMachine(start_state=self.appear_state, transitions={})
         pass
@@ -390,7 +396,9 @@ class Boss2(Boss):
     def decide_action(self):
         roll=random.random()
 
-        if roll < 0.7:
+        if roll < 0.4:
+            self.state_machine.set_state(self.rush_state, e=None)
+        elif roll < 0.8:
             self.state_machine.set_state(self.attack_state, e=None)
         else:
             self.state_machine.set_state(self.idle_state, e=None)
@@ -427,15 +435,16 @@ class Boss3(Boss):
             load_image('boss3/queen3.png'),
         ]
         self.y=300
-        self.max_hp = 200
-        self.hp = 200  # 보스 체력 나중에 수정
-        self.damage = 30  # 나중에 수정
+        self.max_hp = 6000
+        self.hp = 6000  # 보스 체력 나중에 수정
+        self.damage = 60  # 나중에 수정
         self.width = 300
         self.height = 300
         self.sleep_state = BossSleep(self)
         self.idle_state = BossIdle(self)
         self.walk_state = BossWalk(self)
         self.rush_state=BossRush(self)
+        self.smash_state = Boss1Smash(self)
         self.attack_state = Boss2Attack(self, x_off=120, y_off=-30, w=100, h=100, damage=20)
         self.state_machine = StateMachine(start_state=self.sleep_state, transitions={})
         pass
@@ -452,8 +461,9 @@ class Boss3(Boss):
                game_world.add_collision_pair('player_attack:monster', None, skeleton)
 
     def decide_action(self):
+        hp_percent = (self.hp / self.max_hp) * 100
         roll = random.random()
-        if self.hp > 70:
+        if hp_percent > 70:
             if roll < 0.3:
                 self.state_machine.set_state(self.idle_state, e=None)
             elif roll < 0.7:
@@ -461,9 +471,11 @@ class Boss3(Boss):
             else:
                 self.state_machine.set_state(self.rush_state, e=None)
 
-        elif self.hp > 40:
+        elif hp_percent > 40:
             if roll < 0.6:
                 self.state_machine.set_state(self.attack_state, e=None)
+            elif roll < 0.7:
+                self.state_machine.set_state(self.smash_state, e=None)
             else:
                 self.state_machine.set_state(self.rush_state, e=None)
 
