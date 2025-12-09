@@ -238,10 +238,6 @@ class Jump:
         self.p=p
 
     def enter(self,e):
-        if self.p.on_ground:
-            self.p.vy=JUMP_SPEED
-            self.p.on_ground=False
-
         self.p.frame=0
 
     def exit(self,e):
@@ -254,14 +250,11 @@ class Jump:
         self.p.vx = 0
         if self.p.a_down and not self.p.d_down:
             self.p.face_dir = -1
-
             self.p.x -= MOVE_SPEED_RUN * game_framework.frame_time
 
         elif self.p.d_down and not self.p.a_down:
             self.p.face_dir = 1
-
             self.p.x += MOVE_SPEED_RUN * game_framework.frame_time
-
 
         if self.p.on_ground:
             if self.p.shift_down:
@@ -315,23 +308,17 @@ class Attack:
 
     def spawn_effect(self):
 
-        effect_type_to_spawn = 'normal'
-        if self.p.equipped_weapon == 'WEAPON_S_2':
-            effect_type_to_spawn = 'weapon_s_2_effect'
-        elif self.p.equipped_weapon == 'WEAPON4':
-            effect_type_to_spawn = 'weapon_4_effect'
-        elif self.p.equipped_weapon == 'WEAPON3':
-            effect_type_to_spawn = 'weapon_3_effect'
-        elif self.p.equipped_weapon == 'WEAPON_S':
-            effect_type_to_spawn = 'special_s'
-        elif self.p.equipped_weapon == 'WEAPON5':
-            effect_type_to_spawn = 'weapon_5_effect'
-        elif self.p.equipped_weapon == 'WEAPON6':
-            effect_type_to_spawn = 'weapon_6_effect'
-        elif self.p.equipped_weapon == 'weapon_s_3':
-            effect_type_to_spawn = 'special_s_3_effect'
-        elif self.p.equipped_weapon is None:
-            effect_type_to_spawn = 'bare_hand'
+        effect_map = {
+            'WEAPON_S_2': 'weapon_s_2_effect',
+            'WEAPON4': 'weapon_4_effect',
+            'WEAPON3': 'weapon_3_effect',
+            'WEAPON_S': 'special_s',
+            'WEAPON5': 'weapon_5_effect',
+            'WEAPON6': 'weapon_6_effect',
+            'weapon_s_3': 'special_s_3_effect',
+            None: 'bare_hand'
+        }
+        effect_type_to_spawn = effect_map.get(self.p.equipped_weapon, 'normal')
 
         offset_list = self.p.weapon_offset.get('attack', self.p.weapon_offset['idle'])
 
@@ -385,6 +372,8 @@ class Character:
         self.invincible=False
         self.invincible_timer=0.0
         self.scale=1.0
+        self.jump_count=0
+        self.space_down=False
 
         self.max_hp=300
         self.hp=300
@@ -449,7 +438,8 @@ class Character:
                     rmb_down:self.ATTACK
                 },
                 self.JUMP:{
-                    rmb_down:self.ATTACK
+                    rmb_down:self.ATTACK,
+                    space_down:self.JUMP,
                 }
 
 
@@ -466,7 +456,9 @@ class Character:
             elif event.key == SDLK_LSHIFT:
                 self.shift_down=True
             elif event.key==SDLK_SPACE:
-                self.jump()
+                if not self.space_down:
+                    self.jump()
+                    self.space_down=True
             elif event.key ==SDLK_f:
                 self.try_pickup()
             elif event.key ==SDLK_w:
@@ -478,6 +470,8 @@ class Character:
                 self.a_down=False
             elif event.key==SDLK_d:
                 self.d_down=False
+            elif event.key==SDLK_SPACE:
+                self.space_down=False
             elif event.key==SDLK_LSHIFT:
                 self.shift_down=False
             elif event.key==SDLK_w:
@@ -494,8 +488,16 @@ class Character:
 
     def jump(self):
         if self.on_ground:
+            print("1단 점프! (기본 점프)")
             self.vy=JUMP_SPEED
             self.on_ground=False
+            self.jump_count=1
+            self.frame=0
+        elif self.jump_count <2:
+            print("2단 점프! (슈퍼 점프)")
+            self.vy=JUMP_SPEED*1.5
+            self.jump_count +=1
+            self.frame=0
 
     def start_attack(self):
         self.attack_time=ATTACK_ACTIVE
@@ -515,7 +517,7 @@ class Character:
             return
         if group == 'player:monster':
             print("PLAYER collided with MONSTER")
-            self.hp-=5
+            self.hp-= other.damage
             if self.hp<0:self.hp=0
             print(f"Player Hp:{self.hp}")
             self.invincible_timer=0.5
@@ -608,6 +610,7 @@ class Character:
             self.y=GROUND_Y+H//2
             self.vy=0
             self.on_ground=True
+            self.jump_count=0
         self.state_machine.update()
 
         w=get_canvas_width()
