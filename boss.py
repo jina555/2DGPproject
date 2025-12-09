@@ -5,6 +5,7 @@ import game_framework
 import game_world
 import random
 from fireball import Fireball
+from monster import Skeleton
 
 PIXEL_PER_METER = (64.0 / 1.75)
 
@@ -399,6 +400,11 @@ class Boss2(Boss):
         super().handle_collision(group,other)
         pass
 
+
+class Boss3Spawn:
+    pass
+
+
 class Boss3(Boss):
     def __init__(self):
         super().__init__()
@@ -419,6 +425,7 @@ class Boss3(Boss):
         self.walk_state = BossWalk(self)
         self.rush_state=BossRush(self)
         self.attack_state = Boss2Attack(self, x_off=80, y_off=-20, w=100, h=100, damage=20)
+        self.spawn_state = Boss3Spawn(self)
         self.state_machine = StateMachine(start_state=self.sleep_state, transitions={})
         pass
     def get_bb(self):
@@ -426,20 +433,29 @@ class Boss3(Boss):
 
         pass
     def decide_action(self):
-        hp_ratio = self.hp / self.max_hp
         roll = random.random()
-        if hp_ratio>0.7:
-            if roll < 0.5:
+        if self.hp > 70:
+            if roll < 0.3:
+                self.state_machine.set_state(self.idle_state, e=None)
+            elif roll < 0.7:
                 self.state_machine.set_state(self.walk_state, e=None)
             else:
-                self.state_machine.set_state(self.idle_state, e=None)
+                self.state_machine.set_state(self.rush_state, e=None)
+
+        elif self.hp > 40:
+            if roll < 0.6:
+                self.state_machine.set_state(self.attack_state, e=None)
+            else:
+                self.state_machine.set_state(self.rush_state, e=None)
+
         else:
             if roll < 0.4:
+                self.state_machine.set_state(self.spawn_state, e=None)
+            elif roll < 0.7:
                 self.state_machine.set_state(self.attack_state, e=None)
-            elif roll < 0.6:
-                self.state_machine.set_state(self.rush_state,e=None)
-            else:
-                self.state_machine.set_state(self.walk_state,e=None)
+            else:  
+                self.state_machine.set_state(self.rush_state, e=None)
+
 
     def handle_collision(self, group, other):
         super().handle_collision(group, other)

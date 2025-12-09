@@ -308,6 +308,8 @@ class Gollum(Monster):
         self.img_attack=load_image('res/mon3_attack.png')
         self.img_hurt=load_image('res/mon3_hurt.png')
 
+        self.y += 10
+
     def get_bb(self):
         return self.x-45,self.y-45,self.x+45,self.y+45
 
@@ -335,3 +337,21 @@ class Gollum(Monster):
         pass
     def remove_self(self):
         pass
+
+class Skeleton(Monster):
+    def __init__(self,x=None,y=None):
+        super().__init__()
+        self.name='Skeleton'
+        self.max_hp=20
+        self.hp=20
+        self.hp_y_offset=20
+
+        self.img_walk = load_image('boss3/mon4_walk.png')
+        self.img_attack=load_image('boss3/mon4_attack.png')
+        self.img_hurt=load_image('boss3/mon4_hurt.png')
+
+        if x is not None: self.x = x
+        if y is not None: self.y = y
+
+    def get_bb(self):
+        return self.x-50,self.y-50,self.x+50,self.y+30
