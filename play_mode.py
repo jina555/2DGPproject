@@ -9,6 +9,7 @@ from ui_manager import UIManager
 from portal import Portal
 from boss import Boss1,Boss2,Boss3
 from npc import Friend,HpIcon
+import ending_mode
 
 STAGE={
     1:{
@@ -63,6 +64,11 @@ STAGE={
         'boss_class':Boss3,
         'map':'res2/bg_6_2.png',
         'grass':'res2/grass3.png',
+        'portal':(950,230),
+        'next_stage':'ending',
+        'friend_image':'res2/f3.png',
+        'reward_value':None,
+        'friend_pos':(750,200)
     }
 
 
@@ -206,8 +212,8 @@ def handle_events():
         for obj in game_world.world[1]:
             if hasattr(obj, 'handle_event'):
                 obj.handle_event(event)
-
-        player.handle_event(event)
+        if player:
+            player.handle_event(event)
 
 
 def update():
@@ -231,6 +237,9 @@ def update():
 
     if portal and collide(player, portal) and player.w_down:
         next_idx = current_info['next_stage']
+        if next_idx == 'ending':
+            game_framework.change_mode(ending_mode)
+            return
         if next_idx:
             load_stage(next_idx)
             return

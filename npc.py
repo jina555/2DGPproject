@@ -21,6 +21,9 @@ class Friend: # 구출 대상
             distance=((self.x-player.x)**2+(self.y-player.y)**2)**0.5
 
             if distance < 200:
+                if self.reward_value is None:
+                    game_world.remove_object(self)
+                    return
                 if self.reward_value <= 100:
                     inv_icon=InvincibleIcon(790,45)
                     game_world.add_object(inv_icon,2)
