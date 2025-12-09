@@ -402,6 +402,17 @@ class Boss2(Boss):
 
 
 class Boss3Spawn:
+    def __init__(self, boss):
+        pass
+    def enter(self, e):
+        pass
+    def do(self):
+        pass
+    def draw(self):
+        pass
+    def minion(self):
+        pass
+
     pass
 
 
@@ -415,8 +426,8 @@ class Boss3(Boss):
             load_image('boss3/queen3.png'),
         ]
         self.y=270
-        self.max_hp = 100
-        self.hp = 100  # 보스 체력 나중에 수정
+        self.max_hp = 200
+        self.hp = 200  # 보스 체력 나중에 수정
         self.damage = 30  # 나중에 수정
         self.width = 200
         self.height = 200
@@ -425,13 +436,20 @@ class Boss3(Boss):
         self.walk_state = BossWalk(self)
         self.rush_state=BossRush(self)
         self.attack_state = Boss2Attack(self, x_off=80, y_off=-20, w=100, h=100, damage=20)
-        self.spawn_state = Boss3Spawn(self)
         self.state_machine = StateMachine(start_state=self.sleep_state, transitions={})
         pass
     def get_bb(self):
         return self.x - 70, self.y - 100, self.x + 90, self.y + 80
 
-        pass
+    def spawn_minion(self):
+           skeleton = Skeleton(x=self.x - (150 * self.face_dir), y=220)
+           game_world.add_object(skeleton, 1)
+
+           player = game_world.get_player()
+           if player:
+               game_world.add_collision_pair('player:monster', player, skeleton)
+               game_world.add_collision_pair('player_attack:monster', None, skeleton)
+
     def decide_action(self):
         roll = random.random()
         if self.hp > 70:
@@ -450,7 +468,7 @@ class Boss3(Boss):
 
         else:
             if roll < 0.4:
-                self.state_machine.set_state(self.spawn_state, e=None)
+                self.spawn_minion()
             elif roll < 0.7:
                 self.state_machine.set_state(self.attack_state, e=None)
             else:  

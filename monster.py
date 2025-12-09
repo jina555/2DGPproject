@@ -354,4 +354,4 @@ class Skeleton(Monster):
         if y is not None: self.y = y
 
     def get_bb(self):
-        return self.x-50,self.y-50,self.x+50,self.y+30
+        return self.x-25,self.y-50,self.x+25,self.y+30
