@@ -423,23 +423,24 @@ class Boss3(Boss):
         self.images = [
             load_image('boss3/queen.png'),
             load_image('boss3/queen2.png'),
+            load_image('boss3/queen4.png'),
             load_image('boss3/queen3.png'),
         ]
-        self.y=270
+        self.y=300
         self.max_hp = 200
         self.hp = 200  # 보스 체력 나중에 수정
         self.damage = 30  # 나중에 수정
-        self.width = 200
-        self.height = 200
+        self.width = 300
+        self.height = 300
         self.sleep_state = BossSleep(self)
         self.idle_state = BossIdle(self)
         self.walk_state = BossWalk(self)
         self.rush_state=BossRush(self)
-        self.attack_state = Boss2Attack(self, x_off=80, y_off=-20, w=100, h=100, damage=20)
+        self.attack_state = Boss2Attack(self, x_off=120, y_off=-30, w=100, h=100, damage=20)
         self.state_machine = StateMachine(start_state=self.sleep_state, transitions={})
         pass
     def get_bb(self):
-        return self.x - 70, self.y - 100, self.x + 90, self.y + 80
+        return self.x - 125, self.y - 150, self.x + 125, self.y + 120
 
     def spawn_minion(self):
            skeleton = Skeleton(x=self.x - (150 * self.face_dir), y=220)
