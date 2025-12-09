@@ -15,7 +15,12 @@ class SwordEffect:
                 'special_s':load_image('effect/04.png'),
                 'weapon_3_effect': load_image('effect/05.png'),  # WEAPON3용
                 'weapon_4_effect': load_image('effect/06.png'),  # WEAPON4용 (세로 섬광)
-                'weapon_s_2_effect': load_image('effect/07.png')  # WEAPON_S_2용 (가로 섬광)
+                'weapon_s_2_effect': load_image('effect/07.png'),
+                'weapon_5_effect': load_image('effect/08.png'),
+                'weapon_6_effect': load_image('effect/09.png'),
+                'weapon_s_3_effect': load_image('effect/10.png'),
+
+
 
             }
 

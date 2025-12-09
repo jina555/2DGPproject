@@ -302,16 +302,10 @@ class Attack:
         self.p.frame=(self.p.frame + ATTACK_FRAMES_PER_ACTION * ATTACK_ACTION_PER_TIME * game_framework.frame_time)%ATTACK_FRAMES_PER_ACTION
         self.p.attack_time -= game_framework.frame_time
         if self.p.frame >= 2.0 and not self.attacked:
-            # 1) 이펙트 생성
             self.spawn_effect()
-
-            # 2) 공격 판정(Hitbox) 생성 (칼 휘두르는 타이밍에 맞춤)
             self.p.start_attack()
-
-            # 3) "나 공격 했음!" 표시 (중복 실행 방지)
             self.attacked = True
 
-            # 3. 공격 종료 체크
         if self.p.attack_time < 0:
             if self.p.a_down != self.p.d_down:
                 self.p.state_machine.set_state(self.p.WALK, e=None)
@@ -330,6 +324,12 @@ class Attack:
             effect_type_to_spawn = 'weapon_3_effect'
         elif self.p.equipped_weapon == 'WEAPON_S':
             effect_type_to_spawn = 'special_s'
+        elif self.p.equipped_weapon == 'WEAPON5':
+            effect_type_to_spawn = 'weapon_5_effect'
+        elif self.p.equipped_weapon == 'WEAPON6':
+            effect_type_to_spawn = 'weapon_6_effect'
+        elif self.p.equipped_weapon == 'weapon_s_3':
+            effect_type_to_spawn = 'special_s_3_effect'
         elif self.p.equipped_weapon is None:
             effect_type_to_spawn = 'bare_hand'
 
@@ -416,8 +416,6 @@ class Character:
         self.inventory=[]
         self.max_inventory_slots=25
         self.equipped_weapon=None
-
-        self.hand_overlay_image = load_image('res/hand.png')
 
         self.hand_w, self.hand_h = 120, 120
 
