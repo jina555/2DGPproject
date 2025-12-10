@@ -89,10 +89,11 @@ portal=None
 monsters=[]
 respawn_timer=0.0
 current_stage_index=1
+bgm=None
 
 
 def init():
-    global player, game_map, grass,ui_manager,monsters,respawn_timer
+    global player, game_map, grass,ui_manager,monsters,respawn_timer,bgm
 
     player = Character()
     grass=Grass()
@@ -106,10 +107,16 @@ def init():
     game_world.add_collision_pair('player:monster',player,None)
     game_world.add_collision_pair('player_attack:monster',None,None)
     game_world.add_collision_pair('monster_attack:player',None,player)
+    if bgm is None:
+        bgm = load_music('sound/play_bgm.mp3')
+        bgm.set_volume(32)
+
+    bgm.repeat_play()
 
     load_stage(1)
 
     respawn_timer=0.0
+
 
 
 def load_stage(stage_index):
@@ -174,7 +181,9 @@ def load_stage(stage_index):
     print(f"Stage {stage_index} Loaded! Items cleaned.")
 
 def finish():
-    global player,ui_manager
+    global player,ui_manager,bgm
+    if bgm:
+        bgm.stop()
     if ui_manager:
         game_world.remove_object(ui_manager)
         ui_manager=None

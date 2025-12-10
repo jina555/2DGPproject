@@ -30,20 +30,28 @@ char_last_x,char_last_y=0,0
 timer=0.0
 fail_effect=None
 game_over_message=None
-
+bgm=None
 def init():
-    global timer,fail_effect,game_over_message
+    global timer,fail_effect,game_over_message,bgm
+    global bgm
+    bgm = load_music('sound/fail_bgm.mp3')
+    bgm.set_volume(40)
+    bgm.repeat_play()
     timer=GAME_OVER_TIME
     fail_effect=FailEffect(char_last_x,char_last_y+100)
     game_world.add_object(fail_effect,1)
     game_over_message=GameOverMessage()
     game_world.add_object(game_over_message,2)
 def finish():
-    global fail_effect,game_over_message
+    global fail_effect,game_over_message,bgm
+    if bgm:
+        bgm.stop()
+        bgm = None
     if fail_effect:
         game_world.remove_object(fail_effect)
     if game_over_message:
         game_world.remove_object(game_over_message)
+    game_world.clear()
 def update():
     global timer
     timer -= game_framework.frame_time

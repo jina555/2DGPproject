@@ -2,6 +2,7 @@ from pico2d import *
 import game_framework
 import play_mode
 import random
+import game_world
 
 CANVAS_WIDTH=1000
 CANVAS_HEIGHT=725
@@ -12,9 +13,9 @@ SHADOW_DURATION=0.5
 
 background=None
 start_button=None
-start_button=None
 start_button_rect=None
 is_mouse_over_button=False
+bgm=None
 
 character=[]
 shadow_img=None
@@ -50,7 +51,11 @@ class StartCharacter:
 
 def init():
     global background,title,start_button,start_button_rect,is_mouse_over_button
-    global characters,shadow_img,shadow_timer, last_update_time
+    global characters,shadow_img,shadow_timer, last_update_time,bgm
+
+    bgm = load_music('sound/start_bgm.mp3')
+    bgm.set_volume(40)
+    bgm.repeat_play()
 
     background=load_image('res/background.png')
     title=load_image('res/title.png')
@@ -84,7 +89,10 @@ def init():
 
     pass
 def finish():
-    global background,title,start_button,characters,shadow_img
+    global background,title,start_button,characters,shadow_img,bgm
+    if bgm:
+        bgm.stop()
+        bgm = None
     if background:del background
     if title:del title
     if start_button:del start_button

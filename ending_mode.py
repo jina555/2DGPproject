@@ -1,15 +1,22 @@
 from pico2d import *
 import game_framework
 import start_mode
-
+bgm=None
 def init():
-    global image, logo_time
+    global image, logo_time,bgm
+    bgm = load_music('sound/ending_bgm.mp3')
+    bgm.set_volume(40)
+    bgm.repeat_play()
+
     image=load_image('res2/game_clear.png')
     logo_time=0.0
     pass
 def finish():
-    global image
+    global image,bgm
     del image
+    if bgm:
+        bgm.stop()
+        bgm = None
 def update():
     global logo_time
     logo_time += game_framework.frame_time
