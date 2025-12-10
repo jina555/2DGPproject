@@ -8,8 +8,10 @@ import game_world
 from ui_manager import UIManager
 from portal import Portal
 from boss import Boss1,Boss2,Boss3
-from npc import Friend,HpIcon
+from npc import Friend
 import ending_mode
+import fail_mode
+
 
 STAGE={
     1:{
@@ -76,7 +78,7 @@ STAGE={
 
 CANVAS_WIDTH=1000
 CANVAS_HEIGHT=725
-RESPAWN_DELAY=3.0
+RESPAWN_DELAY=1.0
 
 player= None
 game_map=None
@@ -171,18 +173,27 @@ def load_stage(stage_index):
 
     print(f"Stage {stage_index} Loaded! Items cleaned.")
 
-
 def finish():
-    global player,game_map,grass,ui_manager,monsters,respawn_timer,portal
-    game_world.clear()
+    global player,ui_manager
+    if ui_manager:
+        game_world.remove_object(ui_manager)
+        ui_manager=None
     player=None
-    game_map=None
-    grass=None
-    ui_manager=None
-    monsters=[]
-    respawn_timer=0.0
+    pass
+
+def handle_game_over(char_x,char_y):
+    global player
+    if player:
+        game_world.remove_collision_objects(player)
+        game_world.remove_object(player)
+    player=None
+    fail_mode.char_last_x = char_x
+    fail_mode.char_last_y = char_y
+    game_framework.change_mode(fail_mode)
 
 def collide(a, b):
+    if a is None or b is None:
+        return False
     left_a, bottom_a, right_a, top_a = a.get_bb()
     left_b, bottom_b, right_b, top_b = b.get_bb()
 
@@ -217,10 +228,18 @@ def handle_events():
 
 
 def update():
-    global respawn_timer,portal
+    global respawn_timer,portal,player
     game_world.update()
     game_world.handle_collisions()
     current_info=STAGE[current_stage_index]
+    if player and portal and collide(player, portal) and player.w_down:
+        next_idx = current_info['next_stage']
+        if next_idx == 'ending':
+            game_framework.change_mode(ending_mode)
+            return
+        if next_idx:
+            load_stage(next_idx)
+            return
     if current_info['type'] == 'boss':
         if portal is None and monsters and monsters[0].hp <= 0:
             print('Boss Defeated! Portal Open!')
@@ -247,7 +266,7 @@ def update():
     if current_info['type']=='normal':
         monster_count=0
         for o in game_world.world[1]:
-            if type(o)== Monster:
+            if isinstance(o,Monster):
                 monster_count+=1
 
         if monster_count < 5:

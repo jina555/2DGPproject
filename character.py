@@ -27,10 +27,10 @@ RUN_SPEED_PPS = (RUN_SPEED_MPS * PIXEL_PER_METER)
 MOVE_SPEED_RUN = RUN_SPEED_PPS
 MOVE_SPEED_WALK = RUN_SPEED_PPS * 0.5
 
-JUMP_SPEED_MPS = 10.0
+JUMP_SPEED_MPS = 15.0
 JUMP_SPEED = JUMP_SPEED_MPS * PIXEL_PER_METER
 
-GRAVITY_MPS = 25.0
+GRAVITY_MPS = 60.0
 GRAVITY = GRAVITY_MPS * PIXEL_PER_METER
 
 IDLE_FRAMES_PER_ACTION=4
@@ -345,20 +345,6 @@ class Attack:
         _draw_weapon(self.p,'attack')
         pass
 
-# class Die:
-#     def __init__(self,p):
-#         self.p=p
-#     def enter(self,e):
-#
-#         pass
-#     def exit(self,e):
-#         pass
-#     def do(self):
-#         pass
-#     def draw(self):
-#         pass
-#     pass
-
 class Character:
     def __init__(self):
         self.x=400
@@ -476,9 +462,6 @@ class Character:
                 self.shift_down=False
             elif event.key==SDLK_w:
                 self.w_down=False
-
-        # elif event.type==SDL_MOUSEBUTTONDOWN and event.button==SDL_BUTTON_LEFT:
-        #     self.start_attack()
 
         if event.type in (SDL_KEYDOWN, SDL_KEYUP,SDL_MOUSEBUTTONDOWN,SDL_MOUSEBUTTONUP):
             self.last_input_time=get_time()
@@ -620,10 +603,17 @@ class Character:
         if self.x>w -half:
             self.x=w-half
 
+        if self.hp<=0:
+            game_world.remove_collision_objects(self)
+            game_world.remove_object(self)
+            play_mode.handle_game_over(self.x,self.y)
+            return
+
+
     def draw(self):
        self.state_machine.draw()
 
         # draw_rectangle(*self.get_bb(), 255, 0, 0)
 
-
+import play_mode
 
